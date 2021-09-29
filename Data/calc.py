@@ -72,17 +72,17 @@ def InitialRho(N):
 def Iterate():
     Rho0 = InitialRho(N)
     Zeros = np.zeros(3 * N)
-    Rho = np.matrix([Zeros for i in range(len(Zeros))])
+    Rho = tens(N = N).set0()
     for j in range(N):
         for m in range(3):
             for l in range(N):
                 for n in range(3):
-                    var = rhodot([j,m],[l,n], Rho0)
-                    Rho[j+m, l+n] = var.real + var.imag
-                    print(f"j,m = {j+m}, l,n = {l+n}, value = {var}")
+                    var = rhodot([j,m],[l,n], Rho0).real
+                    print(var)
+                    Rho._set(Val = var, index = [[j,m], [l,n]])
+                    
                     
     print(Rho)
-
 
                 
 Iterate()
