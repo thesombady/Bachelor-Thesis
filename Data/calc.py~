@@ -1,13 +1,13 @@
 import numpy as np # Used for computation.
 import pandas as pd # Used for saving the computed data.
-
+from Tensor import *
 """
 Initial conditions for the program.
 Can be changed, expceially the resevoir settings as well as the number of particles N.
 """
-"""
+global N, n_h, n_c
 gamma_h = 1
-gamma_n = 1
+gamma_c = 1
 hbar = 1.0545718 * 10 ** (-34)#m^2kg/s
 
 K_bT_c = 20 * hbar * gamma_h
@@ -15,19 +15,19 @@ K_bT_h = 100 * hbar * gamma_h
 g = 5 * gamma_h
 w_f = 30 * gamma_h #Lasing angular frequency
 w_1 = 0; w_2 = w_f; w_3 = 37.5 * gamma_h
-omega = np.linspace([w_1, w_2, w_3]) #An array of the "energies" of the levels
+omega = np.array([w_1, w_2, w_3]) #An array of the "energies" of the levels
 N = 3 #Number of particles.
-"""
+
 
 def population(omega, KT):
 	"""Temperature float, referring to hot/cold-reseveoir """
 	n = 1/(np.exp(hbar * omega /(KT))-1)
 	return n
 
-"""
+
 n_h = population(w_3 - w_1, K_bT_h)
 n_c = population(w_3 - w_2, K_bT_c)
-"""
+
 
 def delta(n1,n2):
 	"""Simple Kronicka-delta function of two integer numbers, n1 and n2. If they are the same
@@ -61,23 +61,30 @@ def rhodot(alpha, beta, rho):
 		- delta(m,2) * rho[[j,2],[l,n]] - delta(n,2) * rho[[j,m],[l,2]]))
 	return var
 
-# Defining how many photon modes.
-"""
+# Defining how many photon mode.
+
+#Inital Density matrix
 def InitialRho(N):
-    """Initial condition for the density matrix/operator, can be tuned"""
-    #alpha = np.array([(j,m) for j in range(N) for m in range(3)])
-    #beta = np.array([(l,n) for l in range(N) for n in range(3)])
-    alpha = np.array([(l,n) for l in range(N) for n in range(3)]); beta = np.array([(j, m) for j in range(N) for m in range(3)])
-    return np.array([alpha, beta])
-    #return np.matrix([alpha, beta])
-	
-print(InitialRho(3)[0,1][0,1])
-"""
+    "N is the number of photon modes, maximum of 99"
+    Rho0 = tens(N = N).set1()
+    return Rho0
+
+def Iterate():
+    Rho0 = InitialRho(N)
+    Zeros = np.zeros(3 * N)
+    Rho = np.matrix([Zeros for i in range(len(Zeros))])
+    variable = 0
+    for j in range(N):
+        for m in range(3):
+            for l in range(N):
+                for n in range(3):
+                    var = rhodot([j,m],[l,n], Rho0)
+                    Rho[j+m, l+n] = var.imag + var.real
+                    print(f"j,m = {j+m}, l,n = {l+n}, value = {var}")
+                    variable += 1
+    print(Rho)
+    print(variable)
 
 
-def InitialRho(N):
-    """Initial conditons for the density matrix/operator, can be tuned and altered."""
-    alpha = np.array(m + 100 + j for j in range(N) for m in range(3))
-    beta = np.array(n + 100 + l for l in range(N) for m in range(3))
-
-
+                
+Iterate()
