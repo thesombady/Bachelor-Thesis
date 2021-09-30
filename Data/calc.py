@@ -1,5 +1,5 @@
-import numpy as np # Used for computation.
-import pandas as pd # Used for saving the computed data.
+import numpy as np#Used for computation.
+import pandas as pd#Used for saving the computed data.
 from Tensor import *
 """
 Initial conditions for the program.
@@ -13,10 +13,10 @@ hbar = 1.0545718 * 10 ** (-34)#m^2kg/s
 K_bT_c = 20 * hbar * gamma_h
 K_bT_h = 100 * hbar * gamma_h
 g = 5 * gamma_h
-w_f = 30 * gamma_h #Lasing angular frequency
+w_f = 30 * gamma_h#Lasing angular frequency
 w_1 = 0; w_2 = w_f; w_3 = 37.5 * gamma_h
-omega = np.array([w_1, w_2, w_3]) #An array of the "energies" of the levels
-N = 3 #Number of particles.
+omega = np.array([w_1, w_2, w_3])#An array of the "energies" of the levels
+N = 3#Number of particles.
 
 
 def population(omega, KT):
@@ -36,13 +36,12 @@ def delta(n1,n2):
 		return 1
 	else: return 0
 
-
 def rhodot(alpha, beta, rho):
 	"""Iterative solution for the time-evolution of the denisty matrix.
     The solution is derived from Lindblads master equation, with reference of Niduenze nomenclentur,
-    and the correspond system."""	
+    and the correspond system."""
 	if not isinstance((alpha, beta), (list, tuple, np.generic, np.ndarray)):
-		raise TypeError("The input is not of iteratable nature")
+		raise TypeError("The input is not of iterable nature")
 	j,m = alpha[0], alpha[1]
 	l,n = beta[0], beta[1]
 	var = ( 1 / 1j * (w_1 * (delta(m,1)*rho[[j,1],[l,n]]- delta(n,1)*rho[[j,m],[l,1]])
@@ -65,24 +64,23 @@ def rhodot(alpha, beta, rho):
 
 #Inital Density matrix
 def InitialRho(N):
-    "N is the number of photon modes, maximum of 99"
-    Rho0 = tens(N = N).set1()
-    return Rho0
+	"N is the number of photon modes, maximum of 99"
+	Rho0 = tens(N = N).set1()
+	return Rho0
 
 def Iterate():
-    Rho0 = InitialRho(N)
-    Zeros = np.zeros(3 * N)
-    Rho = tens(N = N).set0()
-    for j in range(N):
-        for m in range(3):
-            for l in range(N):
-                for n in range(3):
-                    var = rhodot([j,m],[l,n], Rho0).real
-                    print(var)
-                    Rho._set(Val = var, index = [[j,m], [l,n]])
-                    
-                    
-    print(Rho)
+	Rho0 = InitialRho(N)
+	#Zeros = np.zeros(3 * N)
+	Rho = tens(N = N).set0()
+	for m in range(1, 4):
+		for j in range(N):
+			for n in range(1, 4):
+				for l in range(N):
+					var = rhodot([j,m],[l,n], Rho0)
+					#print(var)
+					Rho._set(Val = var, index = [[j,m], [l,n]])
+	print(Rho)
 
-                
+
+
 Iterate()

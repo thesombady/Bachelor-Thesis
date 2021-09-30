@@ -1,13 +1,10 @@
 import numpy as np
 import pandas as pd
 
-
-
-
 class tensor():# A tensor class explicitly made for a three level maser
-    
+
     def __init__(self, N = 3, Data = None):
-        self.N = N;# Number of photon modes
+        self.N = N # Number of photon modes
         try:
             if Data ==  None:
                 self.Data = Data
@@ -43,19 +40,50 @@ class tensor():# A tensor class explicitly made for a three level maser
             index2 = index[1]
         except Exception as E:
             raise(E)
-        Boundary = self.N * 3
-        Data = self.Data.copy()
-        state1 = index1[1]; state2 = index2[1]
-        photonmode1 = index1[0]; photonmode2 = index2[0]
-        int1 = photonmode1 + state1 ;  int2 = photonmode2 + state2
-        return Data[int1, int2]
-        
+        int1 = 0
+        int2 = 0
+        if index1[1] == 1: # m
+            int1 = 0
+        elif index1[1] == 2: # m
+            int1 = self.N - 1
+        elif index1[1] == 3: #m
+            int1 = 2 * self.N - 1
+        if index2[1] == 1: #n
+            int2 = 0
+        elif index2[1] == 2: #n
+            int2 = self.N - 1
+        elif index2[1] == 3: #n
+            int2 = 2 * self.N - 1
+        return self.Data[int2 + index2[0], int1 + index1[0]]
+
 
     def _set(self, Val, index):
-        index1 = index[0]
-        index2 = index[1]
-        self.Data[index1[0]+index1[1], index2[0]+ index2[1]] = Val
-        return 
+        """ Inserting the value Val, at index index, where index is a double index."""
+        try:
+            index1 = index[0]
+            index2 = index[1]
+        except Exception as E:
+            raise (E)
+        int1 = 0
+        int2 = 0
+        if index1[1] == 1:  # m
+            int1 = 0
+        elif index1[1] == 2:  # m
+            int1 = self.N - 1
+        elif index1[1] == 3:  # m
+            int1 = 2 * self.N - 1
+        if index2[1] == 1:  # n
+            int2 = 0
+        elif index2[1] == 2:  # n
+            int2 = self.N - 1
+        elif index2[1] == 3:  # n
+            int2 = 2 * self.N - 1
+        try:
+            self.Data[int2 + index2[0], int1 + index1[0]] = Val
+        except Excpetion as E:
+            raise(E)
+
+
 
 
 class tens(tensor):
@@ -71,11 +99,11 @@ class tens(tensor):
 
     def set1(self):
         ones = np.ones(3 * self.N)
-        return tensor(self.N, Data = np.matrix([ones * i for i in range(len(ones))]))
+        return tensor(self.N, Data = np.matrix([ones * i for i in range(len(ones))], dtype = complex))
 
     def set0(self):
         zeros = np.zeros(3 * self.N)
-        return tensor(self.N, Data = np.matrix([zeros for i in range(len(zeros))]))
+        return tensor(self.N, Data = np.matrix([zeros for i in range(len(zeros))], dtype = complex))
 
 
 #tens = tensor0()
