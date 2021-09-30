@@ -54,7 +54,7 @@ class tensor():# A tensor class explicitly made for a three level maser
             int2 = self.N - 1
         elif index2[1] == 3: #n
             int2 = 2 * self.N - 1
-        return self.Data[int2 + index2[0], int1 + index1[0]]
+        return self.Data[int1 + index1[0], int2 + index2[0]]
 
 
     def _set(self, Val, index):
@@ -69,24 +69,23 @@ class tensor():# A tensor class explicitly made for a three level maser
         if index1[1] == 1:  # m
             int1 = 0
         elif index1[1] == 2:  # m
-            int1 = self.N - 1
+            int1 = self.N
         elif index1[1] == 3:  # m
-            int1 = 2 * self.N - 1
+            int1 = 2 * self.N
         if index2[1] == 1:  # n
             int2 = 0
         elif index2[1] == 2:  # n
-            int2 = self.N - 1
+            int2 = self.N
         elif index2[1] == 3:  # n
-            int2 = 2 * self.N - 1
+            int2 = 2 * self.N
         try:
-            self.Data[int2 + index2[0], int1 + index1[0]] = Val
+            self.Data[int1 + index1[0], int2 + index2[0]] = Val
+            #print(self.Data[int2 + index2[0], int1 + index1[0]])
         except Excpetion as E:
             raise(E)
 
 
-
-
-class tens(tensor):
+class tens():
 
     def __init__(self, N = 3, Data = None):
         self.N = N

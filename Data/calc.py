@@ -3,9 +3,10 @@ import pandas as pd#Used for saving the computed data.
 from Tensor import *
 """
 Initial conditions for the program.
-Can be changed, expceially the resevoir settings as well as the number of particles N.
+Can be changed, especially the resevoir settings as well as the number of particles N.
 """
 global N, n_h, n_c
+N = 3#Number of particles.
 gamma_h = 1
 gamma_c = 1
 hbar = 1.0545718 * 10 ** (-34)#m^2kg/s
@@ -16,14 +17,13 @@ g = 5 * gamma_h
 w_f = 30 * gamma_h#Lasing angular frequency
 w_1 = 0; w_2 = w_f; w_3 = 37.5 * gamma_h
 omega = np.array([w_1, w_2, w_3])#An array of the "energies" of the levels
-N = 3#Number of particles.
+
 
 
 def population(omega, KT):
 	"""Temperature float, referring to hot/cold-reseveoir """
 	n = 1/(np.exp(hbar * omega /(KT))-1)
 	return n
-
 
 n_h = population(w_3 - w_1, K_bT_h)
 n_c = population(w_3 - w_2, K_bT_c)
@@ -63,24 +63,23 @@ def rhodot(alpha, beta, rho):
 # Defining how many photon mode.
 
 #Inital Density matrix
-def InitialRho(N):
-	"N is the number of photon modes, maximum of 99"
+def InitialRho():
+	"N is the number of photon modes, maximum of 100, which means 0-99 photon-modes."
 	Rho0 = tens(N = N).set1()
 	return Rho0
 
 def Iterate():
-	Rho0 = InitialRho(N)
-	#Zeros = np.zeros(3 * N)
+	Rho0 = InitialRho()
 	Rho = tens(N = N).set0()
 	for m in range(1, 4):
 		for j in range(N):
 			for n in range(1, 4):
 				for l in range(N):
 					var = rhodot([j,m],[l,n], Rho0)
-					#print(var)
+					print(var, f"j,m = {j,m - 1}", f"l,n {l,n - 1}")
 					Rho._set(Val = var, index = [[j,m], [l,n]])
+	#print(Rho.Data.size, Rho0.Data.size)
 	print(Rho)
-
 
 
 Iterate()
