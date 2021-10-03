@@ -1,15 +1,23 @@
 import numpy as np#Used for computation.
-import pandas as pd#Used for saving the computed data.
+#import pandas as pd#Used for saving the computed data.
 from Tensor import *
+import time
+import os
+
+import sys
+#Increasing recursive limit
+sys.setrecursionlimit(2000)
 """
 Initial conditions for the program.
 Can be changed, especially the resevoir settings as well as the number of particles N.
 """
-global N, n_h, n_c
-N = 3#Number of particles.
-gamma_h = 1
-gamma_c = 1
+time1 = time.time()
+global N, n_h, n_c, deltas
+N = 3 #Number of particles.
+gamma_h = 0.001
+gamma_c = 0.001
 hbar = 1.0545718 * 10 ** (-34)#m^2kg/s
+deltas = 10 ** (-9)
 
 K_bT_c = 20 * hbar * gamma_h
 K_bT_h = 100 * hbar * gamma_h
@@ -65,21 +73,44 @@ def rhodot(alpha, beta, rho):
 #Inital Density matrix
 def InitialRho():
 	"N is the number of photon modes, maximum of 100, which means 0-99 photon-modes."
-	Rho0 = tens(N = N).set1()
+	Rho0 = tens(N = N).zerostates()
 	return Rho0
 
-def Iterate():
-	Rho0 = InitialRho()
+def Helper(Rho0):
+	"""Helper function, which computes rho-dot, for a given density operator rho. Is used in Runge function, to iterate either with euler,
+	Runge-Kutta method, in order to solve a first order differential equation at time t."""
 	Rho = tens(N = N).set0()
 	for m in range(1, 4):
 		for j in range(N):
 			for n in range(1, 4):
 				for l in range(N):
 					var = rhodot([j,m],[l,n], Rho0)
-					print(var, f"j,m = {j,m - 1}", f"l,n {l,n - 1}")
+					#print(var, f"j,m = {j,m - 1}", f"l,n {l,n - 1}")
 					Rho._set(Val = var, index = [[j,m], [l,n]])
-	#print(Rho.Data.size, Rho0.Data.size)
-	print(Rho)
+	#print(Rho)
+	#Rho._save('Test')
+	return Rho
 
 
-Iterate()
+Iterations = []
+def Runge(Rho, n):
+	"""Iterative first order differential equation solver, utalizes either Euler method, or Runge-Kutta method
+	in order to solve the first order differential equation system. Since this is iterative, with increments fixed increment,
+	one can easily focus on the time-evolution."""
+	if n > 0:
+		k_1 = Helper(Rho)
+		#k_2 = Helper(Rho + deltas/2 * k_1)
+		#k_3 = Helper(Rho + deltas/2 * k_2)
+		#k_4 = Helper(Rho + deltas * k_3)
+		#yn_1 = Rho + 1/6 * (k_1 + 2 * k_2 + 2 * k_3 + k_4)
+		yn_1 = Rho + deltas * k_1
+		yn_1 = yn_1 / yn_1.Data.sum()#Normalize
+		Iterations.append(yn_1.Data)
+		Runge(yn_1, n-1)
+	else:
+		print("Last entry",Rho)
+		path = os.path.join(os.getcwd(), "test.npy")
+		with open(path, 'wb') as f:
+			np.save(f, np.array(Iterations))
+Runge(InitialRho(), 10)
+print(time.time()-time1)
