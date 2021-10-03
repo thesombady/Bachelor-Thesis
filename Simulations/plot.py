@@ -13,7 +13,15 @@ def plot(data):
 	plt.plot(data)
 	plt.show()
 
-path = os.path.join("/Users/andreasevensen/Documents/GitHub/Bachelor-Thesis", 'Data')
-path1 = os.path.join(path, 'test.npy')
-print(parser(path1)[-1])
+def plotmesh(Data):
+	plt.imshow(Data.real, origin = 'lower', extent = [0,3,0,3], interpolation='bilinear')
+	plt.colorbar()
+	plt.show()
 
+def animate(Data, n):
+	Dataset = Data[n]
+
+path = os.path.join("/Users/andreasevensen/Documents/GitHub/Bachelor-Thesis", 'Data')
+path1 = os.path.join(path, 'Runge100_3.npy')
+Data = parser(path1)
+plotmesh(Data)

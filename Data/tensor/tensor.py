@@ -100,11 +100,11 @@ class tensor():# A tensor class explicitly made for a three level maser
 
     def __add__(self, other):
         Data = self.Data + other.Data /(self.Data.sum() + other.Data.sum())
-        return tensor(N = self.N, Data = self.Data + other.Data)#Data
+        return tensor(N = self.N, Data = Data)#self.Data + other.Data)#Data
 
     def __radd__(self, other):
         Data = self.Data + other.Data / (self.Data.sum() + other.Data.sum())
-        return tensor(N = self.N, Data = self.Data + other.Data)#)Data
+        return tensor(N = self.N, Data = Data)#self.Data + other.Data)#)Data
 
     def __mul__(self, other):
         try:
@@ -166,13 +166,13 @@ class tens():
         """Return a density operator, which only fills the zero-modes with quanta. Could be used as a initial-condition"""
         zeros = np.zeros(3 * self.N)
         tens = tensor(self.N, Data = np.matrix([zeros for i in range(len(zeros))], dtype = complex))
-        value = 1
+        value = hbar
         for j in range(self.N):
             for m in range(1,4):
                 for l in range(self.N):
                     for n in range(1,4):
                         if m == 1 and n == 1:
-                            tens._set(Val = value, index = [[j,m], [l,n]])
+                            tens._set(Val = hbar * j * l, index = [[j,m], [l,n]])
         return tens / 9
 #tens = tensor0()
 #tens = tens.set()

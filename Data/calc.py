@@ -94,23 +94,40 @@ def Helper(Rho0):
 
 Iterations = []
 def Runge(Rho, n):
-	"""Iterative first order differential equation solver, utalizes either Euler method, or Runge-Kutta method
+	"""Iterative first order differential equation solver, utalizing Runge-Kutta method.
 	in order to solve the first order differential equation system. Since this is iterative, with increments fixed increment,
 	one can easily focus on the time-evolution."""
 	if n > 0:
 		k_1 = Helper(Rho)
-		#k_2 = Helper(Rho + deltas/2 * k_1)
-		#k_3 = Helper(Rho + deltas/2 * k_2)
-		#k_4 = Helper(Rho + deltas * k_3)
-		#yn_1 = Rho + 1/6 * (k_1 + 2 * k_2 + 2 * k_3 + k_4)
+		k_2 = Helper(Rho + deltas/2 * k_1)
+		k_3 = Helper(Rho + deltas/2 * k_2)
+		k_4 = Helper(Rho + deltas * k_3)
+		yn_1 = Rho + 1/6 * (k_1 + 2 * k_2 + 2 * k_3 + k_4)
+		yn_1 = yn_1 / yn_1.Data.sum()#Normalize
+		Iterations.append(yn_1.Data)
+		Runge(yn_1, n-1)
+	else:
+		print("Last entry",Rho)
+		path = os.path.join(os.getcwd(), f"Runge{NAME}.npy")
+		with open(path, 'wb') as f:
+			np.save(f, np.array(Iterations))
+
+def Euler(Rho, n):
+	"""Iterative first order differential equation solver, utalizes  Euler method.
+	in order to solve the first order differential equation system. Since this is iterative, with increments fixed increment,
+	one can easily focus on the time-evolution."""
+	if n > 0:
+		k_1 = Helper(Rho)
 		yn_1 = Rho + deltas * k_1
 		yn_1 = yn_1 / yn_1.Data.sum()#Normalize
 		Iterations.append(yn_1.Data)
 		Runge(yn_1, n-1)
 	else:
 		print("Last entry",Rho)
-		path = os.path.join(os.getcwd(), "test.npy")
+		path = os.path.join(os.getcwd(), f"Euler{NAME}.npy")
 		with open(path, 'wb') as f:
 			np.save(f, np.array(Iterations))
-Runge(InitialRho(), 10)
+
+NAME = '100_3'
+Euler(InitialRho(), 100)
 print(time.time()-time1)
