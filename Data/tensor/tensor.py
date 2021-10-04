@@ -1,7 +1,7 @@
 import numpy as np
-import pandas as pd
 import os
 global hbar
+import pandas as pd
 hbar = 1.0545718 * 10 ** (-34)
 
 """We note, in the tensor-class below, we count double indexing, such that rho_{alpha, beta} -> rho[[alpha], [beta]] = rho[[j,m],[l,n]].
@@ -19,7 +19,7 @@ class tensor():# A tensor class explicitly made for a three level maser
             self.Data = Data
 
     def __repr__(self):
-        return f'Data: {self.Data}\nPhoton modes : {self.N}'
+        return 'Data: {Data}\nPhoton modes : {number}'.format(Data = self.Data, number = self.N)
 
     def trace(self):
         """Find the trace of the density operator"""
@@ -42,51 +42,53 @@ class tensor():# A tensor class explicitly made for a three level maser
         space basis, ranging from 0-2 or 1-3. The photon mode itself can go from 0, 99.
         Hence, index is a double-double index, such that [[j,m],[l,n]]. First index is the column, second the row
         Note that the elements in the matrix goes from (0,0), ..., (N,0), (0,1), ..., (N,1), (0,2), ..., (N, 2)"""
+        """
         try:
-            index1 = index[0]
-            index2 = index[1]
+            alpha = index[0]
+            beta = index[1]
         except Exception as E:
             raise(E)
-        int1 = 0
-        int2 = 0
-        if index1[1] == 1: # m
-            int1 = 0
-        elif index1[1] == 2: # m
-            int1 = self.N - 1
-        elif index1[1] == 3: #m
-            int1 = 2 * self.N - 1
-        if index2[1] == 1: #n
-            int2 = 0
-        elif index2[1] == 2: #n
-            int2 = self.N - 1
-        elif index2[1] == 3: #n
-            int2 = 2 * self.N - 1
-        return self.Data[int1 + index1[0], int2 + index2[0]]
+        if alpha[1] == 1: # m
+            alpha1 = 0
+        elif alpha[1] == 2: # m
+            alpha1 = self.N - 1
+        elif alpha[1] == 3: #m
+            alpha1 = 2 * self.N - 1
+        if beta[1] == 1: #n
+            beta1 = 0
+        elif beta[1] == 2: #n
+            beta1 = self.N - 1
+        elif beta[1] == 3: #n
+            beta1 = 2 * self.N - 1
+        print((alpha1 + alpha[0] , beta1 + beta[0]))
+        return self.Data[alpha1 + alpha[0], beta1 + beta[0]]
+        """
+        alpha = index[0]
+        beta =  index[1]
+
 
 
     def _set(self, Val, index):
-        """ Inserting the value Val, at index index, where index is a double index."""
+        """ Inserting the value Val, at index index, where index is a double index. such that [[j,m],[l,n]]"""
         try:
-            index1 = index[0]
-            index2 = index[1]
+            alpha = index[0]
+            beta = index[1]
         except Exception as E:
             raise (E)
-        int1 = 0
-        int2 = 0
-        if index1[1] == 1:  # m
-            int1 = 0
-        elif index1[1] == 2:  # m
-            int1 = self.N
-        elif index1[1] == 3:  # m
-            int1 = 2 * self.N
-        if index2[1] == 1:  # n
-            int2 = 0
-        elif index2[1] == 2:  # n
-            int2 = self.N
-        elif index2[1] == 3:  # n
-            int2 = 2 * self.N
+        if alpha[1] == 1:  # m
+            alpha1 = 0
+        elif alpha[1] == 2:  # m
+            alpha1 = self.N
+        elif alpha[1] == 3:  # m
+            alpha1 = 2 * self.N
+        if beta[1] == 1:  # n
+            beta1 = 0
+        elif beta[1] == 2:  # n
+            beta1 = self.N
+        elif beta[1] == 3:  # n
+            beta1 = 2 * self.N
         try:
-            self.Data[int1 + index1[0], int2 + index2[0]] = Val
+            self.Data[alpha1 + alpha[0], beta1 + beta[0]] = Val
             #print(self.Data[int2 + index2[0], int1 + index1[0]])
         except Exception as E:
             raise(E)
@@ -95,16 +97,16 @@ class tensor():# A tensor class explicitly made for a three level maser
         Data = self.Data.copy()
         df = pd.DataFrame(Data)
         path = os.getcwd()
-        path = os.path.join(path, f'{Name}.csv')
+        path = os.path.join(path, '{name}.csv'.format(name = Name))
         df.to_csv(path)
 
     def __add__(self, other):
         Data = self.Data + other.Data /(self.Data.sum() + other.Data.sum())
-        return tensor(N = self.N, Data = Data)#self.Data + other.Data)#Data
+        return tensor(N = self.N, Data = self.Data + other.Data)#Data
 
     def __radd__(self, other):
         Data = self.Data + other.Data / (self.Data.sum() + other.Data.sum())
-        return tensor(N = self.N, Data = Data)#self.Data + other.Data)#)Data
+        return tensor(N = self.N, Data = self.Data + other.Data)#)Data
 
     def __mul__(self, other):
         try:
@@ -123,7 +125,7 @@ class tensor():# A tensor class explicitly made for a three level maser
             if isinstance(other, complex):
                 realdata = self.Data.real / other
                 imdata = self.Data.imag / other
-                return tensor(N = self.N, Data = realdata + imdata)
+                return tensor(N = self.N, Data = realdata + imdata*1j)
             else:
                 return tensor(N = self.N, Data = self.Data / other)
         else:
@@ -134,7 +136,7 @@ class tensor():# A tensor class explicitly made for a three level maser
             if isinstance(other, complex):
                 realdata = self.Data.real / other
                 imdata = self.Data.imag / other
-                return tensor(N = self.N, Data = realdata + imdata)
+                return tensor(N = self.N, Data = realdata + imdata*1j)
             else:
                 return tensor(N = self.N, Data = self.Data / other)
         else:
@@ -172,8 +174,8 @@ class tens():
                 for l in range(self.N):
                     for n in range(1,4):
                         if m == 1 and n == 1:
-                            tens._set(Val = hbar * j * l, index = [[j,m], [l,n]])
-        return tens / 9
+                            tens._set(Val = 1, index = [[j,m], [l,n]])
+        return tens
 #tens = tensor0()
 #tens = tens.set()
 #print(tens)

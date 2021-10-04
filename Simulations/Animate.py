@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 fig = plt.figure()
-FPS = 1
+FPS = 10
 
 
 def parser(path):
@@ -10,24 +10,22 @@ def parser(path):
 	with open(path, 'rb') as file:
 		Data = np.load(file)
 	return Data
-
-def animate(n):
-	Dataset = Data[n]
-	cax.set_array(Dataset.real)
-global Data
-#path = os.path.join(os.getcwd(), 'test.npy')
-path = '/Users/andreasevensen/Documents/GitHub/Bachelor-Thesis/Data/Runge100_3.npy'
+path = '/Users/andreasevensen/Documents/GitHub/Bachelor-Thesis/Data/Euler100_100.npy'
 Data = parser(path)#
-cax = plt.imshow(Data[-1].real, extent = [0,3,0,3], origin = 'lower', animated = False, interpolation = 'bilinear')
-ani = FuncAnimation(fig, animate, interval = 1, frames = len(Data), blit= True)
+cax = plt.imshow(Data[0].real, extent = [0,3 * 100,0,3 * 100], origin = 'lower', animated = False, interpolation = 'bilinear', vmax = 1e-4, vmin = 0)
+def animate(n):
+	Dataset = Data[n].real
+	cax.set_array(Dataset)
+	plt.title(f'Iteration {n}')
+	return fig,
+
+ani = FuncAnimation(fig, animate, interval = 1, frames = len(Data), blit= False)
 plt.colorbar()
-"""
 try:
-	ani.save('Test.gif', fps=FPS, writer = 'pillow', extra_args=['-vcodec', 'libx264'])
+	ani.save('Euler100_100REAL.gif', fps=FPS, writer = 'pillow', extra_args=['-vcodec', 'libx264'])
 except:
-	ani.save('Test.gif', fps=FPS, writer = 'pillow')
-"""
-try:
-	ani.save('test.mp4')
-except Exception as e:
-	raise(e)
+	try:
+		ani.save('Euler100_100REAL.gif', fps=FPS, writer = 'pillow')
+	except Exception as e:
+		print(e)
+
