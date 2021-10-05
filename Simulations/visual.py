@@ -9,10 +9,10 @@ def parser(path):
 	return Data
 
 
-path = '/Users/andreasevensen/Documents/GitHub/Bachelor-Thesis/Data/EulerLasing100_3.npy'
+path = "/Users/andreasevensen/Documents/GitHub/Bachelor-Thesis/Data/EulerAbove100_100.npy"
 Data = parser(path)
 for i in range(len(Data)):
-	print(Data[i].reshape(-1, 3 * 3))
+	print(Data[i].reshape(3 * 3, - 1).sum())
 	print(i)
 	if i == 5:
 		break

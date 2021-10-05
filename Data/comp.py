@@ -5,29 +5,31 @@ import sys
 import logging
 import os
 global NAME
-np.set_printoptions(precision=2, suppress=True, threshold=81)
+np.set_printoptions(precision=3, suppress=True, threshold=81)
 # Indicate, Run-Photons
-NAME = 'Lasing100_3'
-logging.basicConfig(filename=f'{NAME}.csv', encoding='utf-8', level=logging.DEBUG)
+NAME = 'Above100_100'
+logging.basicConfig(filename=os.path.join(os.getcwd(),f'Log/{NAME}.csv'), encoding='utf-8', level=logging.DEBUG)
 # Increasing recursive limit
 sys.setrecursionlimit(2000)
 """
 Initial conditions for the program.
 Can be changed, especially the reservoir settings as well as the number of particles N.
 """
+
+
 time1 = time.time()
 global N, n_h, n_c, deltas
-N = 3  # Number of particles.
+N = 100  # Number of particles.
 gamma_h = 1
 gamma_c = 1
 hbar = 1  # 1.0545718 * 10 ** (-34)#m^2kg/s
-deltas = 10 ** (-9)
+deltas = 1
 """Above lasing threshold"""
 K_bT_c = 20 * hbar * gamma_h
 K_bT_h = 100 * hbar * gamma_h
 g = 5 * gamma_h
 w_f = 30 * gamma_h  # Lasing angular frequency
-w_1 = 0; w_2 = w_f; w_3 = 37.5 * gamma_h  # Above lasing threshold
+w_1 = 0; w_2 = w_f; w_3 = 150 * gamma_h  # Above lasing threshold
 omega = np.array([w_1, w_2, w_3])  # An array of the "energies" of the levels
 logging.info(f"The computation is done for {NAME}, with the following settings"
 		f"K_bT_c = {K_bT_c}, K_bT_h = {K_bT_h}, gamma_h = {gamma_h}, gamma_c = {gamma_c}"
@@ -42,15 +44,6 @@ def population(w, kt):
 
 n_h = population(w_3 - w_1, K_bT_h)
 n_c = population(w_3 - w_2, K_bT_c)
-
-
-"""
-tensor = np.full((3,3,3,3),0)
-print(tensor)
-print("--------------")
-tensor[0,0][0,1] = 1
-print(tensor)
-"""
 
 
 def delta(n_1, n_2):
@@ -70,12 +63,14 @@ def rhodot(alpha, beta, rho):
 	l, n = beta[0], beta[1]
 
 	def maximum(j, m, l, n):
+		"""Returning the null-state a^\dagger|a> = 0 * |null> if a is the boundary."""
 		if j == N or l == N:
 			return 0
 		else:
 			return rho[j, m][l, n]
 
 	def minimum(j, m, l, n):
+		"""Returning the null-state a|0> = 0 * |null>."""
 		if j == -1 or l == -1:
 			return 0
 		else:
@@ -87,7 +82,7 @@ def rhodot(alpha, beta, rho):
 		+ w_3 * (delta(m, 3 - 1) * rho[j, 3 - 1][l, n] - delta(n, 3 - 1) * rho[j, m][l, 3 - 1])
 		+ w_f * rho[j, m][l, n] * (j - l)
 		+ g * (np.sqrt(j) * delta(m, 1 - 1) * minimum(j - 1, 2 - 1, l, n)
-		+ np.sqrt(j + 1) * delta(m, 2 - 1) * maximum(j + 1, m, l, n)
+		+ np.sqrt(j + 1) * delta(m, 2 - 1) * maximum(j + 1, 1 - 1, l, n)
 		- np.sqrt(l + 1) * delta(n, 2 - 1) * maximum(j, m, l + 1, 1 - 1)
 		- np.sqrt(l) * delta(n, 1 - 1) * minimum(j, m, l - 1, 2 - 1)))
 		+ gamma_h * (n_h + 1) * (2 * delta(m, 1 - 1) * delta(n, 1 - 1) * rho[j, 3 - 1][l, 3 - 1]
@@ -117,18 +112,18 @@ def rhodot(alpha, beta, rho):
 	return var
 
 
-def initialrho(n=3):
+def initialrho(n):
 	ten = np.full((n, 3, n, 3), 0, dtype=complex)
-	for m in range(3):
-		for j in range(n):
-			for n in range(3):
-				for l in range(n):
-					if m == 0 and n == 0:
-						ten[j, m][l, n] = np.random.randint(1, 10) * 0.1
-	return ten
+	for j in range(n):
+		for m in range(3):
+			for l in range(n):
+				for k in range(3):
+					if m == 0 and k == 0 and j == 1 and l == 1:
+						ten[j, m][l, k] = 1
+	return ten/ten.sum()
 
 
-def zerorho(n=3):
+def zerorho(n):
 	ten = np.full((n, 3, n, 3), 0, dtype=complex)
 	return ten
 
@@ -141,7 +136,7 @@ def helper(rho):
 	for m in range(3):
 		for j in range(N):
 			for n in range(3):
-				for l in range(N):
+				for l in range(3):
 					var = rhodot([j, m], [l, n], rho)
 					rho1[j, m][l, n] = var
 	return rho1
@@ -185,4 +180,4 @@ Rho0 = initialrho(n=N)
 # print(Rho0.reshape(N * 3, - 1))
 Iterations.append(Rho0)
 euler(Rho0, 100)
-# print(a.reshape(N*3, c-1))  #This works to reshape to a 3*N matrix.
+# print(Iterations[-1].reshape(3*N, -1))  #This works to reshape to a 3*N matrix.
