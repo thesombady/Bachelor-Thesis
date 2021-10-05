@@ -112,3 +112,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+*.csv
+Data/EulerAbove100_100.npy
