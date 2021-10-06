@@ -148,3 +148,4 @@ def Euler(Rho, n):
 Euler(InitialRho(), int(1 / gamma_h))
 time2 = time.time()-time1
 logging.info(f"Completed the run. Took = {time2} seconds.")
+# Migt not be used.
