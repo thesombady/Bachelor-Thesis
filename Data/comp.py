@@ -7,7 +7,7 @@ import os
 global NAME
 np.set_printoptions(precision=3, suppress=True, threshold=81)
 # Indicate, Run-Photons
-NAME = 'Above100_100'
+NAME = 'Above1000_100'
 logging.basicConfig(filename=os.path.join(os.getcwd(), f'Log/{NAME}.csv'), encoding='utf-8', level=logging.DEBUG)
 # Increasing recursive limit
 sys.setrecursionlimit(2000)
@@ -23,7 +23,7 @@ N = 100  # Number of particles.
 gamma_h = 1
 gamma_c = 1
 hbar = 1  # 1.0545718 * 10 ** (-34)#m^2kg/s
-deltas = 0.01
+deltas = 0.001
 
 # Above lasing threshold
 
@@ -41,7 +41,7 @@ logging.info(f"The computation is done for {NAME}, with the following settings"
 		f"g = {g}, w_f = {w_f}, omegas = {omega}. Deltas =  {deltas}")
 
 
-def population(w, kt):
+def population(w, kt) -> float:
 	"""Temperature float, referring to hot/cold-reservoir """
 	n = 1/(np.exp(hbar * w / kt) - 1)
 	return n
@@ -51,14 +51,14 @@ n_h = population(w_2 - w_0, K_bT_h)
 n_c = population(w_2 - w_1, K_bT_c)
 
 
-def delta(n_1, n_2):
+def delta(n_1, n_2) -> int:
 	if n_1 == n_2:
 		return 1
 	else:
 		return 0
 
 
-def rhodot(alpha, beta, rho):
+def rhodot(alpha, beta, rho) -> complex:
 	"""Iterative solution for the time-evolution of the density matrix.
 	The solution is derived from Lindblad's master equation, with reference of Niduenze notation,
 	and the correspond system."""
@@ -67,14 +67,14 @@ def rhodot(alpha, beta, rho):
 	j, m = alpha[0], alpha[1]
 	l, n = beta[0], beta[1]
 
-	def maximum(p, s, k, d):
+	def maximum(p, s, k, d) -> complex:
 		"""Returning the null-state a^\dagger|a> = 0 * |null> if a is the boundary."""
 		if p == N or k == N:
 			return 0
 		else:
 			return rho[p, s][k, d]
 
-	def minimum(p, s, k, d):
+	def minimum(p, s, k, d) -> complex:
 		"""Returning the null-state a|0> = 0 * |null>."""
 		if p == -1 or k == -1:
 			return 0
@@ -100,29 +100,15 @@ def rhodot(alpha, beta, rho):
 		+ gamma_c * n_c * (2 * delta(m, 3 - 1) * delta(n, 3 - 1) * rho[j, 2 - 1][l, 2 - 1]
 		- delta(m, 2 - 1) * rho[j, 2 - 1][l, n] - delta(n, 2 - 1) * rho[j, m][l, 2 - 1]))
 	"""
-	"""
-	var = (1 / 1j * (w_1 * (delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1])
-		+ w_2 * (delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])
-		+ w_3 * (delta(m, 3) * rho[j, 3][l, n] - delta(n, 3) * rho[j, m][l, 3])
-		+ w_f * rho[j, m][l, n] * (j - l)
-		+ g * (np.sqrt(j) * delta(m, 1) * rho[j - 1, 2][l, n] + np.sqrt(j + 1) * delta(m, 2) * rho[j + 1, m][l, n]
-		- np.sqrt(l + 1) * delta(n, 2) * rho[j, m][l + 1, 1] - np.sqrt(l) * delta(n, 1) * rho[j, m][l - 1, 2]))
-		+ gamma_h * (n_h + 1) * (2 * delta(m, 1) * delta(n, 1) * rho[j, 3][l, 3]
-		- delta(m, 3) * rho[j, 3][l, n] - delta(n, 3) * rho[j, m][l, 3])
-		+ gamma_h * n_h * (2 * delta(m, 3) * delta(n, 3) * rho[j, 1][l, 1]
-		- delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1])
-		+ gamma_c * (n_c + 1) * (2 * delta(m, 2) * delta(n, 2) * rho[j, 3][l, 3]
-		- delta(m, 3) * rho[j, 3][l, n] - delta(n, 3) * rho[j, m][l, 3])
-		+ gamma_c * n_c * (2 * delta(m, 3) * delta(n, 3) * rho[j, 2][l, 2]
-		- delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2]))
-	"""
 	var = (1/1j*(w_0 * (delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])  # first
 		+ w_1 * (delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1])  # second
 		+ w_2 * (delta(m, 2) * rho[j, 2][l, n] - delta(n, 1) * rho[j, m][l, 2])  # third
 		+ w_f * rho[j, m][l, n] * (j - l)  # lasing
-		+ g * (np.sqrt(j) * delta(m, 0) * minimum(j - 1, 1, l, n) + np.sqrt(j + 1) * delta(m, 1) * maximum(j + 1, 0, l, n)
-		- np.sqrt(l + 1) * delta(n, 1) * maximum(j, m, l + 1, 0) - np.sqrt(l) * delta(n, 0) * minimum(j, m, l - 1, 1)))
-		+ gamma_h * (n_h + 1) * (2 * delta(m, 0) * delta(n, 0) * rho[j, 2][l, 2]
+		+ g * (np.sqrt(j) * delta(m, 0) * minimum(j - 1, 1, l, n)
+		+ np.sqrt(j + 1) * delta(m, 1) * maximum(j + 1, 0, l, n)
+		- np.sqrt(l + 1) * delta(n, 1) * maximum(j, m, l + 1, 0)
+		- np.sqrt(l) * delta(n, 0) * minimum(j, m, l - 1, 1)))  # Jaynes-Cumming
+		+ gamma_h * (n_h + 1) * (2 * delta(m, 0) * delta(n, 0) * rho[j, 2][l, 2]  # Liouvillian terms
 		- delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])
 		+ gamma_h * n_h * (2 * delta(m, 2) * delta(n, 2) * rho[j, 0][l, 0]
 		- delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])
@@ -133,7 +119,8 @@ def rhodot(alpha, beta, rho):
 	return var
 
 
-def initialrho(n):
+def initialrho(n: int) -> np.array:
+	"""Returns a initial-condition density matrix."""
 	ten = np.full((n, 3, n, 3), 0, dtype=complex)
 	for j in range(n):
 		for m in range(3):
@@ -149,15 +136,16 @@ def initialrho(n):
 					if j == 1 and m == 1:
 						ten[j, m][l, k] = 1
 					"""
-	return ten/ten.sum()
+	return ten/ten.sum()  # Normalizing
 
 
-def zerorho(n):
+def zerorho(n) -> np.array:
+	"""Returns a tensor of rank(4) with dimension (3N)^2."""
 	ten = np.full((n, 3, n, 3), 0, dtype=complex)
 	return ten
 
 
-def helper(rho):
+def helper(rho) -> np.array:
 	"""Helper function, which computes rho-dot, for a given density operator rho. Is used in Runge function,
 	to iterate either with euler,
 	Runge-Kutta method, in order to solve a first order differential equation at time t."""
@@ -176,9 +164,11 @@ Iterations = []
 
 def euler(rho, n):
 	logging.info(f"Using Euler method")
-	k1 = helper(rho)
+	k1 = helper(rho)  # computes rhodot
 	rho1 = rho + k1 * deltas
-	rho1 = rho1 / (rho1.sum() * rho1.sum().conjugate())
+	a = rho.reshape(3 * N, - 1)  # Line of code to turn it into a 3N square matrix
+	# rho1 = rho1 / (a.sum() * a.sum().conjugate())
+	rho1 = rho1 / (a.trace() * a.trace().conjugate())
 	# rho1 = rho1/(np.sqrt(rho1.real.sum() ** 2 + rho1.imag.sum() ** 2))
 	# print(np.sqrt(rho1.real.sum()**2 + rho1.imag.sum()**2))
 	if n > 0:
@@ -211,12 +201,18 @@ def runge(rho, n):
 			np.save(file, np.array(Iterations))
 
 
+def qfunction(energy, power) -> float:
+	"""Computes the q-factor for a given system"""
+	# Note, we need first to compute E = tr(rho * H), and dE/dt = P to compute the q-factor
+	q = 2 * np.pi * w_f * energy / power
+	return q
+
+
 Rho0 = initialrho(n=N)
 # print(Rho0.reshape(N * 3, - 1))
 Iterations.append(Rho0)
-euler(Rho0, 100)
+euler(Rho0, 1000)
 
 for i in range(len(Iterations)):
-	print(Iterations[i].reshape(3 * N, -1).sum())
+	print(Iterations[i].reshape(3 * N, -1).trace())
 # print(Iterations[-1].reshape(3*N, -1))  #This works to reshape to a 3*N matrix.
-

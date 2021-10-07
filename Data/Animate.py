@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 fig = plt.figure()
-FPS = 10
+FPS = 30
 
 
 def parser(path):
@@ -15,9 +15,9 @@ def parser(path):
 	return data
 
 
-Path = os.path.join(os.getcwd(), 'EulerAbove100_3.npy')
+Path = os.path.join(os.getcwd(), 'EulerAbove1000_100.npy')
 Data = parser(Path)
-Shape = 3 * 3
+Shape = 3 * 100
 cax = plt.imshow(Data[0].reshape(Shape, - 1).real, extent=[0, Shape, 0, Shape], origin='lower',
 				animated=False, interpolation='bilinear')  # , vmax = 1e-4, vmin = 0)
 
@@ -31,7 +31,7 @@ def animate(n):
 
 ani = FuncAnimation(fig, animate, interval=1, frames=len(Data))
 plt.colorbar()
-name = 'EulerAbove100_3REAL.gif'
+name = 'EulerAbove1000_100REAL.gif'
 path = os.path.join(os.path.join(os.getcwd(), 'Sim', name))
 try:
 	ani.save(path, fps=FPS, writer='pillow', extra_args=['-vcodec', 'libx264'])
