@@ -23,7 +23,7 @@ N = 100  # Number of particles.
 gamma_h = 1
 gamma_c = 1
 hbar = 1  # 1.0545718 * 10 ** (-34)#m^2kg/s
-deltas = 0.001
+deltas = 0.0001
 
 # Above lasing threshold
 
@@ -100,6 +100,7 @@ def rhodot(alpha, beta, rho) -> complex:
 		+ gamma_c * n_c * (2 * delta(m, 3 - 1) * delta(n, 3 - 1) * rho[j, 2 - 1][l, 2 - 1]
 		- delta(m, 2 - 1) * rho[j, 2 - 1][l, n] - delta(n, 2 - 1) * rho[j, m][l, 2 - 1]))
 	"""
+	"""
 	var = (1/1j*(w_0 * (delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])  # first
 		+ w_1 * (delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1])  # second
 		+ w_2 * (delta(m, 2) * rho[j, 2][l, n] - delta(n, 1) * rho[j, m][l, 2])  # third
@@ -116,6 +117,21 @@ def rhodot(alpha, beta, rho) -> complex:
 		- delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])
 		+ gamma_c * n_c * (2 * delta(m, 2) * delta(n, 2) * rho[j, 1][l, 1]
 		- delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1]))
+	"""
+	var = (1 / 1j * (w_0 * (delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])  # first
+			+ w_1 * (delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1])  # second
+			+ w_2 * (delta(m, 2) * rho[j, 2][l, n] - delta(n, 1) * rho[j, m][l, 2])  # third
+			+ w_f * rho[j, m][l, n] * (j - l))  # lasing
+			+ g * 2 * (np.sqrt(j) * delta(m,0) * minimum(j -1, 1, l, n)
+			+ np.sqrt(j + 1) * delta(n, 1) * maximum(j + 1, 0, l, n)).imag# Jaynes-Cumming
+			+ gamma_h * (n_h + 1)  * (2 * delta(m, 0) * delta(n, 0) * rho[j, 2][l, 2]  # Liouvillian terms
+			- delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])
+			+ gamma_h * n_h * (2 * delta(m, 2) * delta(n, 2) * rho[j, 0][l, 0]
+			- delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])
+			+ gamma_c * (n_c + 1) * (2 * delta(m, 1) * delta(n, 1) * rho[j, 2][l, 2]
+			- delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])
+			+ gamma_c * n_c * (2 * delta(m, 2) * delta(n, 2) * rho[j, 1][l, 1]
+			- delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1]))
 	return var
 
 
@@ -128,14 +144,6 @@ def initialrho(n: int) -> np.array:
 				for k in range(3):
 					if m == 0 and k == 0 and j == 1 and l == 1:
 						ten[j, m][l, k] = 1
-					"""
-					if n == 0 or k == 0:
-						ten[j, m][l, k] = 1
-					"""
-					"""
-					if j == 1 and m == 1:
-						ten[j, m][l, k] = 1
-					"""
 	return ten/ten.sum()  # Normalizing
 
 
@@ -153,7 +161,7 @@ def helper(rho) -> np.array:
 	for m in range(3):
 		for j in range(N):
 			for n in range(3):
-				for l in range(3):
+				for l in range(N):
 					var = rhodot([j, m], [l, n], rho)
 					rho1[j, m][l, n] = var
 	return rho1
@@ -166,14 +174,10 @@ def euler(rho, n):
 	logging.info(f"Using Euler method")
 	k1 = helper(rho)  # computes rhodot
 	rho1 = rho + k1 * deltas
-	a = rho.reshape(3 * N, - 1)  # Line of code to turn it into a 3N square matrix
-	# rho1 = rho1 / (a.sum() * a.sum().conjugate())
-	rho1 = rho1 / (a.trace() * a.trace().conjugate())
-	# rho1 = rho1/(np.sqrt(rho1.real.sum() ** 2 + rho1.imag.sum() ** 2))
-	# print(np.sqrt(rho1.real.sum()**2 + rho1.imag.sum()**2))
+	print(rho.reshape(3 * N, -1).trace())
 	if n > 0:
 		Iterations.append(rho1)
-		logging.info(f'Iteration {n} yields : {rho1}')
+		logging.info(f'Iteration {n} yields : {rho1}\nTrace is:{rho1.reshape(3 * N, - 1).trace()} for iteration {n}')
 		euler(rho1, n - 1)
 	else:
 		path = os.path.join(os.getcwd(), f'Euler{NAME}.npy')  # "Euler{name}.npy".format(name = NAME))
@@ -212,7 +216,8 @@ Rho0 = initialrho(n=N)
 # print(Rho0.reshape(N * 3, - 1))
 Iterations.append(Rho0)
 euler(Rho0, 1000)
-
+"""
 for i in range(len(Iterations)):
 	print(Iterations[i].reshape(3 * N, -1).trace())
 # print(Iterations[-1].reshape(3*N, -1))  #This works to reshape to a 3*N matrix.
+"""
