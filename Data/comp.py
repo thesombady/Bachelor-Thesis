@@ -5,9 +5,9 @@ import sys
 import logging
 import os
 global NAME
-np.set_printoptions(precision=3, suppress=True, threshold=81)
+np.set_printoptions(precision=5, suppress=True, threshold=81)
 # Indicate, Run-Photons
-NAME = 'Above1000_100'
+NAME = 'Below1000_100'
 logging.basicConfig(filename=os.path.join(os.getcwd(), f'Log/{NAME}.csv'), encoding='utf-8', level=logging.DEBUG)
 # Increasing recursive limit
 sys.setrecursionlimit(2000)
@@ -30,11 +30,11 @@ deltas = 0.0001
 K_bT_c = 20 * hbar * gamma_h
 K_bT_h = 100 * hbar * gamma_h
 g = 5 * gamma_h
-w_f = 30 * gamma_h  # Lasing angular frequency
+w_f = 34 * gamma_h  # Lasing angular frequency
 # w_1 = 0; w_2 = w_f; w_3 = 150 * gamma_h  # Above lasing threshold
 w_0 = 0
 w_1 = w_f
-w_2 = 150 * gamma_h
+w_2 = 37.5 * gamma_h
 omega = np.array([w_0, w_1, w_2])  # An array of the "energies" of the levels
 logging.info(f"The computation is done for {NAME}, with the following settings"
 		f"K_bT_c = {K_bT_c}, K_bT_h = {K_bT_h}, gamma_h = {gamma_h}, gamma_c = {gamma_c}"
@@ -68,7 +68,8 @@ def rhodot(alpha, beta, rho) -> complex:
 	l, n = beta[0], beta[1]
 
 	def maximum(p, s, k, d) -> complex:
-		"""Returning the null-state a^\dagger|a> = 0 * |null> if a is the boundary."""
+		"""Returning the null-state
+		a^\dagger|a> = 0 * |null> if a is the boundary."""
 		if p == N or k == N:
 			return 0
 		else:
@@ -118,13 +119,14 @@ def rhodot(alpha, beta, rho) -> complex:
 		+ gamma_c * n_c * (2 * delta(m, 2) * delta(n, 2) * rho[j, 1][l, 1]
 		- delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1]))
 	"""
+	"""
 	var = (1 / 1j * (w_0 * (delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])  # first
 			+ w_1 * (delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1])  # second
 			+ w_2 * (delta(m, 2) * rho[j, 2][l, n] - delta(n, 1) * rho[j, m][l, 2])  # third
 			+ w_f * rho[j, m][l, n] * (j - l))  # lasing
-			+ g * 2 * (np.sqrt(j) * delta(m,0) * minimum(j -1, 1, l, n)
-			+ np.sqrt(j + 1) * delta(n, 1) * maximum(j + 1, 0, l, n)).imag# Jaynes-Cumming
-			+ gamma_h * (n_h + 1)  * (2 * delta(m, 0) * delta(n, 0) * rho[j, 2][l, 2]  # Liouvillian terms
+			+ 2 * g * (np.sqrt(j) * delta(m, 0) * minimum(j - 1, 1, l, n)
+			+ np.sqrt(j + 1) * delta(m, 1) * maximum(j + 1, 0, l, n)).imag   # Jaynes-Cumming
+			+ gamma_h * (n_h + 1) * (2 * delta(m, 0) * delta(n, 0) * rho[j, 2][l, 2]  # Liouvillian terms
 			- delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])
 			+ gamma_h * n_h * (2 * delta(m, 2) * delta(n, 2) * rho[j, 0][l, 0]
 			- delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])
@@ -132,6 +134,21 @@ def rhodot(alpha, beta, rho) -> complex:
 			- delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])
 			+ gamma_c * n_c * (2 * delta(m, 2) * delta(n, 2) * rho[j, 1][l, 1]
 			- delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1]))
+	"""
+	var = (1/1j * (w_0 * (delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])  # first
+			+ w_1 * (delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1])  # second
+			+ w_2 * (delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])  # third
+			+ w_f * rho[j, m][l, n] * (j - l))  # lasing
+			+ 2 * g * (np.sqrt(j) * delta(m, 0) * minimum(j - 1, 1, l, n)
+			+ np.sqrt(j + 1) * delta(m, 1) * maximum(j + 1, 0, l, n)).imag  # Jaynes-Cumming
+			+ gamma_h * (n_h + 1) * (2 * delta(n, 0) * delta(m, 0) * rho[j, 2][l, 2]
+			- delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])
+			+ gamma_h * n_h * (2 * delta(m, 2) * delta(n, 2) * rho[j, 0][l, 0]
+			- delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])  # Hot-Liouvillian
+			+ gamma_c * (n_c + 1) * (2 * delta(m, 1) * delta(n, 1) * rho[j, 2][l, 2]
+			- delta(m, 2) * rho[j, 2][l, 2] - delta(n, 2) * rho[j, m][l, 2])
+			+ gamma_c * n_c * (2 * delta(m, 2) * delta(n, 2) * rho[j, 1][l, 1]
+			- delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1]))  # Cold - Liouvillian
 	return var
 
 
@@ -142,7 +159,7 @@ def initialrho(n: int) -> np.array:
 		for m in range(3):
 			for l in range(n):
 				for k in range(3):
-					if m == 0 and k == 0 and j == 1 and l == 1:
+					if m == 1 and k == 1 and j == 1 and l == 1:
 						ten[j, m][l, k] = 1
 	return ten/ten.sum()  # Normalizing
 
@@ -172,10 +189,11 @@ Iterations = []
 
 def euler(rho, n):
 	logging.info(f"Using Euler method")
-	k1 = helper(rho)  # computes rhodot
-	rho1 = rho + k1 * deltas
-	print(rho.reshape(3 * N, -1).trace())
 	if n > 0:
+		k1 = helper(rho)  # computes rhodot
+		rho1 = rho + k1 * deltas
+		print(f'Iteration:{n}', rho.reshape(3 * N, - 1).trace())
+		# print(rho.reshape(3 * N, - 1))
 		Iterations.append(rho1)
 		logging.info(f'Iteration {n} yields : {rho1}\nTrace is:{rho1.reshape(3 * N, - 1).trace()} for iteration {n}')
 		euler(rho1, n - 1)
@@ -195,8 +213,8 @@ def runge(rho, n):
 		k_3 = helper(rho + deltas / 2 * k_2)
 		k_4 = helper(rho + deltas * k_3)
 		rho1 = rho + (k_1 + 2 * k_2 + 2 * k_3 + k_4)
-		# rho1 = rho1/np.sqrt(rho1.real.sum() ** 2 + rho1.imag.sum() ** 2)
 		Iterations.append(rho1)
+		# sprint(rho.reshape(3 * N, -1).trace())
 		logging.info(f'Iteration {n} yields : {rho1}')
 		runge(rho1, n - 1)
 	else:
@@ -217,6 +235,7 @@ Rho0 = initialrho(n=N)
 Iterations.append(Rho0)
 euler(Rho0, 1000)
 """
+
 for i in range(len(Iterations)):
 	print(Iterations[i].reshape(3 * N, -1).trace())
 # print(Iterations[-1].reshape(3*N, -1))  #This works to reshape to a 3*N matrix.
