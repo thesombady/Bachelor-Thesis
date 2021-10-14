@@ -1,82 +1,63 @@
-import os
 import numpy as np
+import sys, os
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-from matplotlib.animation import ArtistAnimation
-import matplotlib
+
+PATH = os.getcwd()
+Name = 'EulerLasing1000_100.npy'
+N = 100
 
 
-
-def parser(path):
-	"""A parser function, which utalizes the functionality of numpy.save. Using this method,
-	each iteration can be imported, where then Data is an array of the different iterations."""
-	with open(path, 'rb') as file:
-		data = np.load(file)
-	return data
+def parser(path) -> np.array:
+    with open(path, 'rb') as file:
+        data = np.load(file)
+    return data
 
 
-"""
-cax1 = plt.imshow(Data[0].reshape(Shape, - 1).real, extent=[0, Shape, 0, Shape], origin='lower',
-				animated=False, interpolation='bilinear')  # , vmax = 1e-4, vmin = 0)
-cax2 = plt.imshow(Data[0].reshape(Shape, - 1).imag, extent=[0, Shape, 0, Shape], origin='lower', 
-	animated=False, interpolation='bilinear')
-"""
+def plot(data1):
+    shape = 3 * N
+    dataset = data.reshape(shape, -1).real
+    plt.imshow(dataset, extent=[0, shape, 0, shape], interpolation='bilinear',
+			origin='lower', animated=False, vmin=0, vmax=1)
+    plt.show()
 
-"""
+
+fig, ax = plt.subplots(2,1, figsize=(20, 20))  # plt.figure()
+FPS = 50
+
+path2 = os.path.join(PATH, Name)
+data1 = parser(path2)
+cax1 = ax[0].imshow(data1[0].reshape(3 * N, - 1).real, extent=[0, 3 * N, 0, 3 * N],
+                 interpolation='bilinear', origin='lower', animated=False, vmin=0, vmax=1)
+cax2 = ax[1].imshow(data1[0].reshape(3 * N, - 1).imag, extent=[0, 3 * N, 0, 3 * N],
+                 interpolation='bilinear', origin='lower', animated=False, vmin=0, vmax=data1[-1].imag.sum())
+
+c1 = plt.colorbar(cax1, ax=ax[0], orientation='horizontal', fraction=0.04)
+c2 = plt.colorbar(cax2, ax=ax[1], orientation='horizontal', fraction=0.04)
+
+
 def animate(n):
-	dataset = Data[n].reshape(Shape, - 1)
-	cax1.set_array(dataset.real)
-	plt.title(f'Iteration {n}')
-	return fig,
+    dataset = data1[n].reshape(3 * N, - 1)
+    fig.suptitle(f'Iteration {n}')
+    im1 = cax1.set_array(dataset.real)
+    ax[0].set_title('Real')
+    im2 = cax2.set_array(dataset.imag)
+    ax[1].set_title('Imaginary')
+    print(n, dataset.imag.sum())
+    return fig,
 
 
-ani = FuncAnimation(fig, animate1, interval=1, frames=len(Data))
-#plt.colorbar()
-
-"""
-
-Path = os.path.join(os.getcwd(), 'EulerAbove1000_100.npy')
-Data = parser(Path)
-Shape = 3 * 100
+ani = FuncAnimation(fig, animate, interval=1, frames=len(data1))
 
 
-fig = plt.figure()
-FPS = 30
-ax1 = fig.add_subplot(2, 1, 1)
-ax2 = fig.add_subplot(2, 1, 2)
-iterations = []
-for i in range(len(Data)):
-	plt.title(f'Iteration {i}')
-	im1 = ax1.imshow(Data[i].reshape(Shape, - 1).real, extent=[0, Shape, 0, Shape],
-					origin='lower', animated=False, interpolation='bilinear', vmax=1, vmin=-1)
-	im2 = ax2.imshow(Data[i].reshape(Shape, - 1).imag, extent=[0, Shape, 0, Shape],
-					origin='lower', animated=False, interpolation='bilinear', vmax=1, vmin=-1)
-	fig.colorbar(im1, cax=ax1)
-	fig.colorbar(im2, cax=ax2)
-	iterations.append([im1, im2])
+def name(path2):
+    name1 = path2.replace('.npy', '.gif')
+    return name1
 
-ani = ArtistAnimation(fig, iterations, blit=True, interval=50)
-name = 'EulerAbove1000_100.mp4'
-path = os.path.join(os.path.join(os.getcwd(), 'Sim', name))
-print("ani made")
-#writer = AnimatedPNGWriter(fps=FPS)
-matplotlib.rcParams['animation.FFmpeg_path'] = r'/Users/andreasevensen/opt/anaconda3/pkgs/ffmpeg-4.3.2-h4dad6da_0/bin/ffmpeg '
-"""
+
 try:
-	print("first")
-	ani.save(path, fps=FPS, writer='pillow')
-except Exception as e:
-	raise e
-"""
-print("about to ")
-writer = matplotlib.animation.FFMpegWriter()
-ani.save(path, fps=FPS, writer=f'{writer}')
-plt.show()
+    ani.save(name(path2), fps=FPS, writer = 'pillow', extra_args=['-vcodec', 'libx264'])
+except:
+    ani.save(name(path2), fps=FPS, writer = 'pillow')
 
-"""
-vid = ani.to_html5_video()
-html = display.HTML(vid)
-display.display(html)
-plt.close()
-print(vid)
-"""
+
