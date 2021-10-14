@@ -4,8 +4,9 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 PATH = os.getcwd()
-Name = 'EulerLasing1000_100.npy'
+Name = 'EulerAbove1000_100_1.npy'
 N = 100
+Shape = 3 * N
 
 
 def parser(path) -> np.array:
@@ -14,10 +15,9 @@ def parser(path) -> np.array:
     return data
 
 
-def plot(data1):
-    shape = 3 * N
-    dataset = data.reshape(shape, -1).real
-    plt.imshow(dataset, extent=[0, shape, 0, shape], interpolation='bilinear',
+def plot(data):
+    dataset = data.reshape(Shape, -1).real
+    plt.imshow(dataset, extent=[0, Shape, 0, Shape], interpolation='bilinear',
 			origin='lower', animated=False, vmin=0, vmax=1)
     plt.show()
 
@@ -27,9 +27,9 @@ FPS = 50
 
 path2 = os.path.join(PATH, Name)
 data1 = parser(path2)
-cax1 = ax[0].imshow(data1[0].reshape(3 * N, - 1).real, extent=[0, 3 * N, 0, 3 * N],
+cax1 = ax[0].imshow(data1[0].reshape(Shape, - 1).real, extent=[0, Shape, 0, Shape],
                  interpolation='bilinear', origin='lower', animated=False, vmin=0, vmax=1)
-cax2 = ax[1].imshow(data1[0].reshape(3 * N, - 1).imag, extent=[0, 3 * N, 0, 3 * N],
+cax2 = ax[1].imshow(data1[0].reshape(Shape, - 1).imag, extent=[0, Shape, 0, Shape],
                  interpolation='bilinear', origin='lower', animated=False, vmin=0, vmax=data1[-1].imag.sum())
 
 c1 = plt.colorbar(cax1, ax=ax[0], orientation='horizontal', fraction=0.04)
@@ -37,7 +37,7 @@ c2 = plt.colorbar(cax2, ax=ax[1], orientation='horizontal', fraction=0.04)
 
 
 def animate(n):
-    dataset = data1[n].reshape(3 * N, - 1)
+    dataset = data1[n].reshape(Shape, - 1)
     fig.suptitle(f'Iteration {n}')
     im1 = cax1.set_array(dataset.real)
     ax[0].set_title('Real')
