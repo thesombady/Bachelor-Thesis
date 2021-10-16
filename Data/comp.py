@@ -8,15 +8,19 @@ global NAME
 np.set_printoptions(precision=5, suppress=True, threshold=81)
 # Indicate, Run-Photons
 NAME = 'Above1000_100_1'
+KEY = 'Euler'
 itera = 1000
-logging.basicConfig(filename=os.path.join(os.getcwd(), f'Log/{NAME}.csv'), encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(filename=os.path.join(os.getcwd(), f'Log/{NAME + KEY}.csv'), encoding='utf-8', level=logging.DEBUG)
 # Increasing recursive limit
 sys.setrecursionlimit(2000)
 """
 Initial conditions for the program.
 Can be changed, especially the reservoir settings as well as the number of particles N.
 """
-
+Method = {
+	'Euler': lambda rho, n: euler(rho, n),
+	'Runge': lambda rho, n: runge(rho, n),
+}
 
 global N, n_h, n_c, deltas
 N = 100  # Number of particles.
@@ -223,17 +227,16 @@ def runge(rho, n):
 			np.save(file, np.array(Iterations))
 
 
-def qfunction(energy, power) -> float:
-	"""Computes the q-factor for a given system"""
-	# Note, we need first to compute E = tr(rho * H), and dE/dt = P to compute the q-factor
-	q = 2 * np.pi * w_f * energy / power
-	return q
 
 start = time.time()
 Rho0 = initialrho(n=N)
 # print(Rho0.reshape(N * 3, - 1))
 Iterations.append(Rho0)
-euler(Rho0, itera)
+# euler(Rho0, itera)
+try:
+	Method[KEY](Rho0, itera)
+except:
+	pass
 logging.info(f'Runtime {time.time()-start}')
 """
 
