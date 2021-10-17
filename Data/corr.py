@@ -1,8 +1,9 @@
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 
 PATH = os.getcwd()
-Name = 'EulerBelow1000_100_1.npy'
+Name = 'RungeAbove1000_100_1.npy'
 path1 = os.path.join(PATH, Name)
 N = 100
 Shape = 3 * N
@@ -11,7 +12,7 @@ gamma_c = 1
 w_0 = 0
 w_1 = 30 * gamma_h
 w_f = w_1
-w_2 = 34 * gamma_h  # 34, 37.5, 150; This is the one we change depending on the cavity state
+w_2 = 150 * gamma_h  # 34, 37.5, 150; This is the one we change depending on the cavity state
 w = [w_0, w_f, w_2]
 hbar = 1
 g = 1
@@ -22,12 +23,8 @@ g = 1
 def parser(path) -> np.array:
     """Parses the data, such that it's located in an .npy file."""
     with open(path, 'rb') as file:
-        data = np.load(file)
-    return data
-
-
-def entropy(data):
-    pass
+        data1 = np.load(file)
+    return data1
 
 
 def delta(n_1, n_2) -> int:
@@ -73,8 +70,41 @@ def entropy(data1, n) -> complex:
     return data2.reshape(3 * N, -1).trace()
 
 
-data = parser(path1)
-for i in range(len(data)):
-    val = energy(data, i)
-    print(val, i)
+def name(path2):
+    name1 = path2.replace('.npy', '.png')
+    return name1
 
+
+def name3(path2):
+    name1 = path2.replace('.npy', 'Energy.npy')
+    return name1
+
+
+def name2(path):
+    list1 = ['Euler', 'Runge']
+    list2 = ['Below', 'Above', 'Lasing']
+    for val1 in list1:
+        if val1 in path:
+            for val2 in list2:
+                if val2 in path:
+                    return 'Energy Energy using {} method, at {}-threshold'.format(val1, val2.lower())
+    return 'nothing'
+
+
+data = parser(path1)
+value = []
+xlist = [i for i in range((len(data)))]
+for i in range(len(data)):
+    vals = energy(data, i)
+    print(vals, i)
+    value.append(vals.real)
+
+with open(name3(path1), 'wb') as file:
+    np.save(file, np.array(value))
+
+plt.plot(xlist, value, '.', label='Energy', markersize=0.8)
+plt.title(f'{name2(path1)}')
+plt.xlabel('Iterations')
+plt.ylabel('Energy, a.u')
+plt.legend()
+plt.savefig(name(path1))

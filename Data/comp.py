@@ -7,8 +7,8 @@ import os
 global NAME
 np.set_printoptions(precision=5, suppress=True, threshold=81)
 # Indicate, Run-Photons
-NAME = 'Above1000_100_1'
-KEY = 'Euler'
+NAME = 'Lasing1000_100_1'
+KEY = 'Runge'
 itera = 1000
 logging.basicConfig(filename=os.path.join(os.getcwd(), f'Log/{NAME + KEY}.csv'), encoding='utf-8', level=logging.DEBUG)
 # Increasing recursive limit
@@ -27,7 +27,7 @@ N = 100  # Number of particles.
 gamma_h = 1
 gamma_c = 1
 hbar = 1  # 1.0545718 * 10 ** (-34)#m^2kg/s
-deltas = 0.001
+deltas = 0.00001
 
 # Above lasing threshold
 
@@ -38,7 +38,7 @@ w_f = 30 * gamma_h  # Lasing angular frequency
 # w_1 = 0; w_2 = w_f; w_3 = 150 * gamma_h  # Above lasing threshold
 w_0 = 0
 w_1 = w_f
-w_2 = 150 * gamma_h  # This is the one we change for laser, 34, 37.5, 150 respectively.
+w_2 = 37.5 * gamma_h  # This is the one we change for laser, 34, 37.5, 150 respectively.
 omega = np.array([w_0, w_1, w_2])  # An array of the "energies" of the levels
 logging.info(f"The computation is done for {NAME}, with the following settings"
 		f"K_bT_c = {K_bT_c}, K_bT_h = {K_bT_h}, gamma_h = {gamma_h}, gamma_c = {gamma_c}"
@@ -212,20 +212,19 @@ def runge(rho, n):
 	if not isinstance(rho, (np.ndarray, np.generic)):
 		raise TypeError("Input is of wrong format")
 	if n > 1:
-		k_1 = helper(rho)
-		k_2 = helper(rho + deltas / 2 * k_1)
-		k_3 = helper(rho + deltas / 2 * k_2)
-		k_4 = helper(rho + deltas * k_3)
-		rho1 = rho + (k_1 + 2 * k_2 + 2 * k_3 + k_4)
+		k1 = helper(rho)
+		k2 = helper(rho + deltas / 2 * k1)
+		k3 = helper(rho + deltas / 2 * k2)
+		k4 = helper(rho + deltas * k3)
+		rho1 = rho + (k1 + 2 * k2 + 2 * k3 + k4) * deltas /6
 		Iterations.append(rho1)
-		# sprint(rho.reshape(3 * N, -1).trace())
+		print(rho.reshape(3 * N, -1).trace(), n)
 		logging.info(f'Iteration {n} yields : {rho1}')
 		runge(rho1, n - 1)
 	else:
 		path = os.path.join(os.getcwd(), f'Runge{NAME}.npy')
 		with open(path, 'wb') as file:
 			np.save(file, np.array(Iterations))
-
 
 
 start = time.time()
