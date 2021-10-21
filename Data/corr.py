@@ -3,7 +3,8 @@ import os
 import matplotlib.pyplot as plt
 
 PATH = os.getcwd()
-Name = 'RungeAbove1000_100_1.npy'
+Name = 'EulerAbove1000_100_1.npy'
+deltas = 0.0001
 path1 = os.path.join(PATH, Name)
 N = 100
 Shape = 3 * N
@@ -12,7 +13,26 @@ gamma_c = 1
 w_0 = 0
 w_1 = 30 * gamma_h
 w_f = w_1
-w_2 = 150 * gamma_h  # 34, 37.5, 150; This is the one we change depending on the cavity state
+# w_2 = 37.5 * gamma_h  # 34, 37.5, 150; This is the one we change depending on the cavity state
+
+
+def omega(name):
+    if 'Lasing' in name:
+        print('Lasing')
+        return 37.5
+    if 'Below' in name:
+        print('Below')
+        return 34
+    if 'Above' in name:
+        print('Above')
+        return 150
+    else:
+        raise KeyError("Can't determine what omega to use")
+
+
+w_2 = omega(Name) * gamma_h
+
+
 w = [w_0, w_f, w_2]
 hbar = 1
 g = 1
@@ -93,7 +113,7 @@ def name2(path):
 
 data = parser(path1)
 value = []
-xlist = [i for i in range((len(data)))]
+xlist = [i * deltas for i in range((len(data)))]
 for i in range(len(data)):
     vals = energy(data, i)
     print(vals, i)
@@ -102,9 +122,10 @@ for i in range(len(data)):
 with open(name3(path1), 'wb') as file:
     np.save(file, np.array(value))
 
-plt.plot(xlist, value, '.', label='Energy', markersize=0.8)
+
+plt.plot(xlist, value, '.', label='Average energy', markersize=0.8)
 plt.title(f'{name2(path1)}')
-plt.xlabel('Iterations')
+plt.xlabel('Time, a.u')
 plt.ylabel('Energy, a.u')
 plt.legend()
 plt.savefig(name(path1))

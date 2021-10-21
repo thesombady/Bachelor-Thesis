@@ -4,6 +4,7 @@ Bachelor-thesis project for Andreas Evensen at Lund University. This project inv
 
 # Problem
 The program is used to solve, by the Runge-Kutta method, the following equation,
+
   <img src="https://render.githubusercontent.com/render/math?math=\dot{\rho}=\frac{1}{i\hbar}\Big[\hat{H},\hat{\rho}\Big]\pm\mathcal{L}_h\hat{\rho}\pm\mathcal{L}_c\hat{\rho}.">
 
 Note, there is no minus, could just not render without it. Furthermore, the density matrix is of pure-states, such that the standards relationships holds. Therefore, it's easy to extract

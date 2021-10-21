@@ -7,7 +7,7 @@ import os
 global NAME
 np.set_printoptions(precision=5, suppress=True, threshold=81)
 # Indicate, Run-Photons
-NAME = 'Lasing1000_100_1'
+NAME = 'Above1000_100_2'
 KEY = 'Runge'
 itera = 1000
 logging.basicConfig(filename=os.path.join(os.getcwd(), f'Log/{NAME + KEY}.csv'), encoding='utf-8', level=logging.DEBUG)
@@ -27,7 +27,7 @@ N = 100  # Number of particles.
 gamma_h = 1
 gamma_c = 1
 hbar = 1  # 1.0545718 * 10 ** (-34)#m^2kg/s
-deltas = 0.00001
+deltas = 0.0001
 
 # Above lasing threshold
 
@@ -38,7 +38,7 @@ w_f = 30 * gamma_h  # Lasing angular frequency
 # w_1 = 0; w_2 = w_f; w_3 = 150 * gamma_h  # Above lasing threshold
 w_0 = 0
 w_1 = w_f
-w_2 = 37.5 * gamma_h  # This is the one we change for laser, 34, 37.5, 150 respectively.
+w_2 = 150 * gamma_h  # This is the one we change for laser, 34, 37.5, 150 respectively.
 omega = np.array([w_0, w_1, w_2])  # An array of the "energies" of the levels
 logging.info(f"The computation is done for {NAME}, with the following settings"
 		f"K_bT_c = {K_bT_c}, K_bT_h = {K_bT_h}, gamma_h = {gamma_h}, gamma_c = {gamma_c}"
@@ -86,59 +86,6 @@ def rhodot(alpha, beta, rho) -> complex:
 		else:
 			return rho[p, s][k, d]
 
-	# Check w_f term, might be wrong, also check g factor, since it's dealing with evolution
-	"""
-	var = (1 / 1j * (w_1 * (delta(m, 1 - 1) * rho[j, 1 - 1][l, n] - delta(n, 1 - 1) * rho[j, m][l, 1 - 1])
-		+ w_2 * (delta(m, 2 - 1) * rho[j, 2 - 1][l, n] - delta(n, 2 - 1) * rho[j, m][l, 2 - 1])
-		+ w_3 * (delta(m, 3 - 1) * rho[j, 3 - 1][l, n] - delta(n, 3 - 1) * rho[j, m][l, 3 - 1])
-		+ w_f * rho[j, m][l, n] * (j - l)
-		+ g * (np.sqrt(j) * delta(m, 1 - 1) * minimum(j - 1, 2 - 1, l, n)
-		+ np.sqrt(j + 1) * delta(m, 2 - 1) * maximum(j + 1, 1 - 1, l, n)
-		- np.sqrt(l + 1) * delta(n, 2 - 1) * maximum(j, m, l + 1, 1 - 1)
-		- np.sqrt(l) * delta(n, 1 - 1) * minimum(j, m, l - 1, 2 - 1)))
-		+ gamma_h * (n_h + 1) * (2 * delta(m, 1 - 1) * delta(n, 1 - 1) * rho[j, 3 - 1][l, 3 - 1]
-		- delta(m, 3 - 1) * rho[j, 3 - 1][l, n] - delta(n, 3 - 1) * rho[j, m][l, 3 - 1])
-		+ gamma_h * n_h * (2 * delta(m, 3 - 1) * delta(n, 3 - 1) * rho[j, 1 - 1][l, 1 - 1]
-		- delta(m, 1 - 1) * rho[j, 1 - 1][l, n] - delta(n, 1 - 1) * rho[j, m][l, 1 - 1])
-		+ gamma_c * (n_c + 1) * (2 * delta(m, 2 - 1) * delta(n, 2 - 1) * rho[j, 3 - 1][l, 3 - 1]
-		- delta(m, 3 - 1) * rho[j, 3 - 1][l, n] - delta(n, 3 - 1) * rho[j, m][l, 3 - 1])
-		+ gamma_c * n_c * (2 * delta(m, 3 - 1) * delta(n, 3 - 1) * rho[j, 2 - 1][l, 2 - 1]
-		- delta(m, 2 - 1) * rho[j, 2 - 1][l, n] - delta(n, 2 - 1) * rho[j, m][l, 2 - 1]))
-	"""
-	"""
-	var = (1/1j*(w_0 * (delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])  # first
-		+ w_1 * (delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1])  # second
-		+ w_2 * (delta(m, 2) * rho[j, 2][l, n] - delta(n, 1) * rho[j, m][l, 2])  # third
-		+ w_f * rho[j, m][l, n] * (j - l)  # lasing
-		+ g * (np.sqrt(j) * delta(m, 0) * minimum(j - 1, 1, l, n)
-		+ np.sqrt(j + 1) * delta(m, 1) * maximum(j + 1, 0, l, n)
-		- np.sqrt(l + 1) * delta(n, 1) * maximum(j, m, l + 1, 0)
-		- np.sqrt(l) * delta(n, 0) * minimum(j, m, l - 1, 1)))  # Jaynes-Cumming
-		+ gamma_h * (n_h + 1) * (2 * delta(m, 0) * delta(n, 0) * rho[j, 2][l, 2]  # Liouvillian terms
-		- delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])
-		+ gamma_h * n_h * (2 * delta(m, 2) * delta(n, 2) * rho[j, 0][l, 0]
-		- delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])
-		+ gamma_c * (n_c + 1) * (2 * delta(m, 1) * delta(n, 1) * rho[j, 2][l, 2]
-		- delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])
-		+ gamma_c * n_c * (2 * delta(m, 2) * delta(n, 2) * rho[j, 1][l, 1]
-		- delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1]))
-	"""
-	"""
-	var = (1 / 1j * (w_0 * (delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])  # first
-			+ w_1 * (delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1])  # second
-			+ w_2 * (delta(m, 2) * rho[j, 2][l, n] - delta(n, 1) * rho[j, m][l, 2])  # third
-			+ w_f * rho[j, m][l, n] * (j - l))  # lasing
-			+ 2 * g * (np.sqrt(j) * delta(m, 0) * minimum(j - 1, 1, l, n)
-			+ np.sqrt(j + 1) * delta(m, 1) * maximum(j + 1, 0, l, n)).imag   # Jaynes-Cumming
-			+ gamma_h * (n_h + 1) * (2 * delta(m, 0) * delta(n, 0) * rho[j, 2][l, 2]  # Liouvillian terms
-			- delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])
-			+ gamma_h * n_h * (2 * delta(m, 2) * delta(n, 2) * rho[j, 0][l, 0]
-			- delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])
-			+ gamma_c * (n_c + 1) * (2 * delta(m, 1) * delta(n, 1) * rho[j, 2][l, 2]
-			- delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])
-			+ gamma_c * n_c * (2 * delta(m, 2) * delta(n, 2) * rho[j, 1][l, 1]
-			- delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1]))
-	"""
 	var = (1/1j * (w_0 * (delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])  # first
 			+ w_1 * (delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1])  # second
 			+ w_2 * (delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])  # third

@@ -3,6 +3,9 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
+# PATH = "EulerAbove1000_100_2Energy.npy"
+deltas = 0.0001
+
 
 def parser(path):
 	"""A parser function, which utilizes the functionality of numpy.save.
@@ -12,7 +15,7 @@ def parser(path):
 	return data
 
 
-fig, axs = plt.subplots(2, 1, constrained_layout=True)
+# fig, axs = plt.subplots(2, 1, constrained_layout=True)
 
 
 def plot(data, n):
@@ -36,12 +39,12 @@ def plot(data, n):
 
 
 dicter = {
-	'Real' : lambda val : val.real,
-	'Imag' : lambda val : val.imag
+	'Real': lambda val: val.real,
+	'Imag': lambda val: val.imag
 }
 
 
-def plot2(data,n):
+def plot2(data, n):
 	for ax, key in zip(axs, dicter):
 		dataset = dicter[key](data[n].reshape(Shape, - 1))
 		im = ax.imshow(dataset, extent=[0, Shape, 0, Shape], interpolation='bilinear',
@@ -53,11 +56,40 @@ def plot2(data,n):
 	plt.show()
 
 
+def name(path):
+	if "Lasing" in path:
+		return 'w_f = 37.5'
+	elif "Above" in path:
+		return 'w_f = 150'
+	elif "Below" in path:
+		return 'w_f = 34'
+	else:
+		raise KeyError(f"No key found")
 
 
+def name2(path):
+	return path.replace('.npy', '.png')
+
+
+def plot3(data, path):
+	xlist = [i * deltas for i in range(len(data))]
+	plt.plot(xlist, data, '.', scale=0.8, label='Average Energy')
+	plt.legend()
+	plt.title(r'$<E> = Tr[\hat{\rho}\hat{H}]$, $\omega_f ={}').format(name(path))
+	plt.xlabel('Time, a.u')
+	plt.ylabel('Energy, a.u')
+	plt.savefig(name2(path))
+
+
+"""
 Shape = 3 * 100
 Name = 'EulerAbove1000_100'
 os.mkdir(os.path.join(os.getcwd(), Name))
 Data = parser(os.path.join(os.getcwd(), f'{Name}.npy'))
 for i in range(len(Data)):
 	plot2(Data[i], i)
+"""
+
+# plot3(parser(PATH), PATH)
+for file in os.scandir():
+	print(file)
