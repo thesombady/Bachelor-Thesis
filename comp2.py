@@ -1,9 +1,11 @@
 import numpy as np  # Used for computation.
 import time
 import sys
-# import logging
 import os
 np.set_printoptions(precision=5, suppress=True, threshold=81)
+
+itera = 1000
+N = 50  # Number of particles.
 
 
 def parser():
@@ -37,7 +39,7 @@ def parser():
 KEY, deltas, NAME, w_2 = parser()
 # NAME = 'Below1000_50_1'
 # KEY = 'Runge'
-itera = 10000
+
 # Increasing recursive limit
 sys.setrecursionlimit(2000)
 
@@ -45,7 +47,6 @@ Method = {
 	'Euler': lambda rho, n: euler(rho, n),
 	'Runge': lambda rho, n: runge(rho, n),
 }
-N = 100  # Number of particles.
 gamma_h = 1
 gamma_c = 1
 hbar = 1  # 1.0545718 * 10 ** (-34)#m^2kg/s
@@ -59,6 +60,7 @@ w_0 = 0
 w_1 = w_f
 w_2 = w_2 * gamma_h  # This is the one we change for laser, 34, 37.5, 150 respectively.
 omega = np.array([w_0, w_1, w_2])  # An array of the "energies" of the levels
+
 
 def population(w, kt) -> float:
 	"""Temperature float, referring to hot/cold-reservoir """
@@ -175,7 +177,7 @@ def runge(rho, n):
 		k2 = helper(rho + deltas / 2 * k1)
 		k3 = helper(rho + deltas / 2 * k2)
 		k4 = helper(rho + deltas * k3)
-		rho1 = rho + (k1 + 2 * k2 + 2 * k3 + k4) * deltas /6
+		rho1 = rho + (k1 + 2 * k2 + 2 * k3 + k4) * deltas / 6
 		Iterations.append(rho1)
 		print(rho.reshape(3 * N, -1).trace(), n)
 		runge(rho1, n - 1)
@@ -191,5 +193,4 @@ Iterations.append(Rho0)
 try:
 	Method[KEY](Rho0, itera)
 except:
-	pass
-print(Iterations[-1].reshape(3 * N, -1))
+	raise Exception('Error in computing the time-evolution')

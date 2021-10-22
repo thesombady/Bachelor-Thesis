@@ -121,12 +121,3 @@ for i in range(len(data)):
 
 with open(name3(path1), 'wb') as file:
     np.save(file, np.array(value))
-
-"""
-plt.plot(xlist, value, '.', label='Average energy', markersize=0.8)
-plt.title(f'{name2(path1)}')
-plt.xlabel('Time, a.u')
-plt.ylabel('Energy, a.u')
-plt.legend()
-plt.savefig(name1(path1))
-"""
