@@ -4,7 +4,6 @@ import sys
 # import logging
 import os
 np.set_printoptions(precision=5, suppress=True, threshold=81)
-# Indicate, Run-Photons
 
 
 def parser():
@@ -46,20 +45,16 @@ Method = {
 	'Euler': lambda rho, n: euler(rho, n),
 	'Runge': lambda rho, n: runge(rho, n),
 }
-# global N, n_h, n_c, deltas
-# deltas = 0.0001
 N = 100  # Number of particles.
 gamma_h = 1
 gamma_c = 1
 hbar = 1  # 1.0545718 * 10 ** (-34)#m^2kg/s
 
-# Above lasing threshold
 
 K_bT_c = 20 * hbar * gamma_h
 K_bT_h = 100 * hbar * gamma_h
 g = 5 * gamma_h
 w_f = 30 * gamma_h  # Lasing angular frequency
-# w_1 = 0; w_2 = w_f; w_3 = 150 * gamma_h  # Above lasing threshold
 w_0 = 0
 w_1 = w_f
 w_2 = w_2 * gamma_h  # This is the one we change for laser, 34, 37.5, 150 respectively.
@@ -192,17 +187,9 @@ def runge(rho, n):
 
 start = time.time()
 Rho0 = initialrho(n=N)
-# print(Rho0.reshape(N * 3, - 1))
 Iterations.append(Rho0)
-# euler(Rho0, itera)
 try:
 	Method[KEY](Rho0, itera)
 except:
 	pass
 print(Iterations[-1].reshape(3 * N, -1))
-"""
-
-for i in range(len(Iterations)):
-	print(Iterations[i].reshape(3 * N, -1).trace())
-# print(Iterations[-1].reshape(3*N, -1))  #This works to reshape to a 3*N matrix.
-"""
