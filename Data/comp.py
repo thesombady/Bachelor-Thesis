@@ -110,7 +110,7 @@ def initialrho(n: int) -> np.array:
 		for m in range(3):
 			for l in range(n):
 				for k in range(3):
-					if m == 1 and k == 1 and j == 0 and l == 0:
+					if m == 0 and k == 0 and j == 0 and l == 0:
 						ten[j, m][l, k] = 1
 	return ten/ten.sum()  # Normalizing
 

@@ -20,7 +20,7 @@ def parser():
 			return 34, 'Below'
 		elif 'Lasing' in argument:
 			return 37.5, 'Lasing'
-	print(argv)
+
 	if "-h" in opts:
 		print("""Arg1 = Method to use, Euler & Runge,Arg2 = Delta t(0.001),
 		Arg3 = Mode of operation(Above, Below, Lasing)""")
@@ -38,7 +38,7 @@ def parser():
 KEY, deltas, NAME, w_2 = parser()
 # NAME = 'Below1000_50_1'
 # KEY = 'Runge'
-itera = 1000
+itera = 10000
 # Increasing recursive limit
 sys.setrecursionlimit(2000)
 
@@ -48,7 +48,7 @@ Method = {
 }
 # global N, n_h, n_c, deltas
 # deltas = 0.0001
-N = 10  # Number of particles.
+N = 100  # Number of particles.
 gamma_h = 1
 gamma_c = 1
 hbar = 1  # 1.0545718 * 10 ** (-34)#m^2kg/s
@@ -130,7 +130,7 @@ def initialrho(n: int) -> np.array:
 		for m in range(3):
 			for l in range(n):
 				for k in range(3):
-					if m == 1 and k == 1 and j == 1 and l == 1:
+					if m == 0 and k == 0 and j == 0 and l == 0:
 						ten[j, m][l, k] = 1
 	return ten/ten.sum()  # Normalizing
 
@@ -152,6 +152,7 @@ def helper(rho) -> np.array:
 				for l in range(N):
 					var = rhodot([j, m], [l, n], rho)
 					rho1[j, m][l, n] = var
+	assert (Iterations[-1].reshape(3 * N, -1) ** 2).all() == Iterations[-1].reshape(3 * N, -1).all(), 'Failed computation'
 	return rho1
 
 
@@ -198,6 +199,7 @@ try:
 	Method[KEY](Rho0, itera)
 except:
 	pass
+print(Iterations[-1].reshape(3 * N, -1))
 """
 
 for i in range(len(Iterations)):

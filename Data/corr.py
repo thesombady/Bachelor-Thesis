@@ -3,10 +3,10 @@ import os
 import matplotlib.pyplot as plt
 
 PATH = os.getcwd()
-Name = 'RungeBelow1000_50_0_01.npy'
+Name = 'RungeAbove1000_50_0_01.npy.npy'
 deltas = 0.01
 path1 = os.path.join(PATH, Name)
-N = 50
+N = 100
 Shape = 3 * N
 gamma_h = 1
 gamma_c = 1
