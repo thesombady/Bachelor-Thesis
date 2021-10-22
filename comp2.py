@@ -1,55 +1,54 @@
 import numpy as np  # Used for computation.
 import time
 import sys
-import logging
+# import logging
 import os
-global NAME
 np.set_printoptions(precision=5, suppress=True, threshold=81)
 # Indicate, Run-Photons
 
 
 def parser():
-	global w_2
 	opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]
 	argv = [arg for arg in sys.argv[1:] if not arg.startswith("-")]
 
-	assert len(sys.argv) <= 5, 'To many arguments'
-
+	assert len(argv) <= 4, 'To many arguments'
 
 	def name(argument):
 		if 'Above' in argument:
-			w_2 = 150 * gamma_h
+			return 150, 'Above'
 		elif 'Below' in argument:
-			w_2 = 34 * gamma_h
+			return 34, 'Below'
 		elif 'Lasing' in argument:
-			w_2 = 37.5 * gamma_h
-
-
-
+			return 37.5, 'Lasing'
+	print(argv)
 	if "-h" in opts:
-		print("Arg1 = Number of photon modes, Arg2 = Number of iterations, Arg3 = Number of iterations\nArg4 = Mode of operation")
-		sys.exit
+		print("""Arg1 = Method to use, Euler & Runge,Arg2 = Delta t(0.001),
+		Arg3 = Mode of operation(Above, Below, Lasing)""")
+		sys.exit()
+	try:
+		KEY = str(argv[0])
+		deltas = float(argv[1])
+		w_2 = name(argv[2])[0]
+		NAME = name(argv[2])[1]
+		return KEY, deltas, NAME, w_2
+	except Exception as e:
+		raise e
 
 
-
-NAME = 'Below1000_50_1'
-KEY = 'Runge'
+KEY, deltas, NAME, w_2 = parser()
+# NAME = 'Below1000_50_1'
+# KEY = 'Runge'
 itera = 1000
-logging.basicConfig(filename=os.path.join(os.getcwd(), f'Log/{NAME + KEY}.csv'), encoding='utf-8', level=logging.DEBUG)
 # Increasing recursive limit
 sys.setrecursionlimit(2000)
-"""
-Initial conditions for the program.
-Can be changed, especially the reservoir settings as well as the number of particles N.
-"""
+
 Method = {
 	'Euler': lambda rho, n: euler(rho, n),
 	'Runge': lambda rho, n: runge(rho, n),
 }
-
-global N, n_h, n_c, deltas
-deltas = 0.0001
-N = 50  # Number of particles.
+# global N, n_h, n_c, deltas
+# deltas = 0.0001
+N = 10  # Number of particles.
 gamma_h = 1
 gamma_c = 1
 hbar = 1  # 1.0545718 * 10 ** (-34)#m^2kg/s
@@ -63,12 +62,8 @@ w_f = 30 * gamma_h  # Lasing angular frequency
 # w_1 = 0; w_2 = w_f; w_3 = 150 * gamma_h  # Above lasing threshold
 w_0 = 0
 w_1 = w_f
-w_2 = 34 * gamma_h  # This is the one we change for laser, 34, 37.5, 150 respectively.
+w_2 = w_2 * gamma_h  # This is the one we change for laser, 34, 37.5, 150 respectively.
 omega = np.array([w_0, w_1, w_2])  # An array of the "energies" of the levels
-logging.info(f"The computation is done for {NAME}, with the following settings"
-		f"K_bT_c = {K_bT_c}, K_bT_h = {K_bT_h}, gamma_h = {gamma_h}, gamma_c = {gamma_c}"
-		f"g = {g}, w_f = {w_f}, omegas = {omega}. Deltas =  {deltas}")
-
 
 def population(w, kt) -> float:
 	"""Temperature float, referring to hot/cold-reservoir """
@@ -164,22 +159,19 @@ Iterations = []
 
 
 def euler(rho, n):
-	logging.info(f"Using Euler method")
 	if n > 0:
 		k1 = helper(rho)  # computes rhodot
 		rho1 = rho + k1 * deltas
 		print(f'Iteration:{n}', rho.reshape(3 * N, - 1).trace())
 		Iterations.append(rho1)
-		logging.info(f'Iteration {n} yields : {rho1}\nTrace is:{rho1.reshape(3 * N, - 1).trace()} for iteration {n}')
 		euler(rho1, n - 1)
 	else:
-		path = os.path.join(os.getcwd(), f'Euler{NAME}.npy')  # "Euler{name}.npy".format(name = NAME))
+		path = os.path.join(os.getcwd(), f'Euler{NAME}{str(itera)}_{N}_{deltas}.npy')
 		with open(path, 'wb') as file:
 			np.save(file, np.array(Iterations))
 
 
 def runge(rho, n):
-	logging.info(f"Using Runge-Kutta method")
 	if not isinstance(rho, (np.ndarray, np.generic)):
 		raise TypeError("Input is of wrong format")
 	if n > 0:
@@ -190,10 +182,9 @@ def runge(rho, n):
 		rho1 = rho + (k1 + 2 * k2 + 2 * k3 + k4) * deltas /6
 		Iterations.append(rho1)
 		print(rho.reshape(3 * N, -1).trace(), n)
-		logging.info(f'Iteration {n} yields : {rho1}')
 		runge(rho1, n - 1)
 	else:
-		path = os.path.join(os.getcwd(), f'Runge{NAME}.npy')
+		path = os.path.join(os.getcwd(), f'Runge{NAME}{str(itera)}_{N}_{deltas}.npy')
 		with open(path, 'wb') as file:
 			np.save(file, np.array(Iterations))
 
@@ -207,7 +198,6 @@ try:
 	Method[KEY](Rho0, itera)
 except:
 	pass
-logging.info(f'Runtime {time.time()-start}')
 """
 
 for i in range(len(Iterations)):

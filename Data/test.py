@@ -2,6 +2,7 @@ import sys
 
 gamma_h = 1
 
+
 def parser():
     opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]
     argv = [arg for arg in sys.argv[1:] if not arg.startswith("-")]

@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 PATH = "RungeAbove1000_100_2Energy.npy"
-deltas = 0.001
+deltas = 0.01
 N = 50
 Shape = 3 * N
 
@@ -95,13 +95,18 @@ def name3(path1):
 
 def plotdiff(path1, path2):
 	"""Path1 has to be of euler method, path2 has to be of runge-kutta method"""
-	fig, ax = plt.subplots()
+	ax = plt.axes()
 	values1 = parser(path1)
 	values2 = parser(path2)
 	assert len(values1) == len(values2), 'Different lengths'
 	xlist = np.array([i for i in range(len(values1))]) * deltas
 	ax.plot(xlist, values1, '.', markersize=0.8, color='red', label="Euler")
 	ax.plot(xlist, values2, '.', markersize=0.8, color='blue', label="Runge-Kutta")
+	ax2 = plt.axes([0.5, 0.3, 0.3, 0.3])
+	ax2.plot(xlist, values1, '.', markersize=0.8, color='red', label="Euler")
+	ax2.plot(xlist, values2, '.', markersize=0.8, color='blue', label="Runge-Kutta")
+	ax2.set_ylim([6, 10])
+	ax2.set_xlim([0, 1])
 	ax.set_xlabel(r'Time, a.u')
 	ax.set_ylabel(r'Energy, a.u')
 	ax.set_title('Average energy comparison of\nEuler-, and Runge-Kutta-method  {}'.format(name3(path1)))
@@ -125,6 +130,6 @@ for i in range(len(Data)):
 for file in os.scandir():
 	print(file)
 """
-Path1 = 'EulerBelow1000_50_0_001Energy.npy'
-Path2 = 'RungeBelow1000_50_0_001Energy.npy'
+Path1 = 'EulerBelow1000_50_0_01Energy.npy'
+Path2 = 'RungeBelow1000_50_0_01Energy.npy'
 plotdiff(Path1, Path2)
