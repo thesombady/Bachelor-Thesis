@@ -1,7 +1,7 @@
 import numpy as np  # Used for computation.
 import time
 import sys
-import logging
+# import logging
 import os
 global NAME
 np.set_printoptions(precision=5, suppress=True, threshold=81)
@@ -9,7 +9,7 @@ np.set_printoptions(precision=5, suppress=True, threshold=81)
 NAME = 'Above1000_50_0_01'
 KEY = 'Euler'
 itera = 1000
-logging.basicConfig(filename=os.path.join(os.getcwd(), f'Log/{NAME + KEY}.csv'), encoding='utf-8', level=logging.DEBUG)
+# logging.basicConfig(filename=os.path.join(os.getcwd(), f'Log/{NAME + KEY}.csv'), encoding='utf-8', level=logging.DEBUG)
 # Increasing recursive limit
 sys.setrecursionlimit(2000)
 """
@@ -39,7 +39,7 @@ w_0 = 0
 w_1 = w_f
 w_2 = 150 * gamma_h  # This is the one we change for laser, 34, 37.5, 150 respectively.
 omega = np.array([w_0, w_1, w_2])  # An array of the "energies" of the levels
-logging.info(f"The computation is done for {NAME}, with the following settings"
+# logging.info(f"The computation is done for {NAME}, with the following settings"
 		f"K_bT_c = {K_bT_c}, K_bT_h = {K_bT_h}, gamma_h = {gamma_h}, gamma_c = {gamma_c}"
 		f"g = {g}, w_f = {w_f}, omegas = {omega}. Deltas =  {deltas}")
 
@@ -140,13 +140,13 @@ Iterations = []
 
 def euler(rho, n):
 	"""Find the evolution of rhodot, in terms of Eulers method."""
-	logging.info(f"Using Euler method")
+	# logging.info(f"Using Euler method")
 	if n > 0:
 		k1 = helper(rho)  # computes rhodot
 		rho1 = rho + k1 * deltas
 		print(f'Iteration:{n}', rho.reshape(3 * N, - 1).trace())
 		Iterations.append(rho1)
-		logging.info(f'Iteration {n} yields : {rho1}\nTrace is:{rho1.reshape(3 * N, - 1).trace()} for iteration {n}')
+		# logging.info(f'Iteration {n} yields : {rho1}\nTrace is:{rho1.reshape(3 * N, - 1).trace()} for iteration {n}')
 		euler(rho1, n - 1)
 	else:
 		path = os.path.join(os.getcwd(), f'Euler{NAME}.npy')  # "Euler{name}.npy".format(name = NAME))
@@ -156,7 +156,7 @@ def euler(rho, n):
 
 def runge(rho, n):
 	"""Find the evolution of rhodot in terms of Runge-Kutta method"""
-	logging.info(f"Using Runge-Kutta method")
+	# logging.info(f"Using Runge-Kutta method")
 	if not isinstance(rho, (np.ndarray, np.generic)):
 		raise TypeError("Input is of wrong format")
 	if n > 0:
@@ -167,7 +167,7 @@ def runge(rho, n):
 		rho1 = rho + (k1 + 2 * k2 + 2 * k3 + k4) * deltas /6
 		Iterations.append(rho1)
 		print(rho.reshape(3 * N, -1).trace(), n)
-		logging.info(f'Iteration {n} yields : {rho1}')
+		# logging.info(f'Iteration {n} yields : {rho1}')
 		runge(rho1, n - 1)
 	else:
 		path = os.path.join(os.getcwd(), f'Runge{NAME}.npy')
@@ -184,7 +184,7 @@ try:
 	Method[KEY](Rho0, itera)
 except:
 	pass
-logging.info(f'Runtime {time.time()-start}')
+# logging.info(f'Runtime {time.time()-start}')
 """
 
 for i in range(len(Iterations)):
