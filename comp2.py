@@ -6,8 +6,34 @@ import os
 global NAME
 np.set_printoptions(precision=5, suppress=True, threshold=81)
 # Indicate, Run-Photons
-NAME = 'Above1000_50_0_01'
-KEY = 'Euler'
+
+
+def parser():
+	global w_2
+	opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]
+	argv = [arg for arg in sys.argv[1:] if not arg.startswith("-")]
+
+	assert len(sys.argv) <= 5, 'To many arguments'
+
+
+	def name(argument):
+		if 'Above' in argument:
+			w_2 = 150 * gamma_h
+		elif 'Below' in argument:
+			w_2 = 34 * gamma_h
+		elif 'Lasing' in argument:
+			w_2 = 37.5 * gamma_h
+
+
+
+	if "-h" in opts:
+		print("Arg1 = Number of photon modes, Arg2 = Number of iterations, Arg3 = Number of iterations\nArg4 = Mode of operation")
+		sys.exit
+
+
+
+NAME = 'Below1000_50_1'
+KEY = 'Runge'
 itera = 1000
 logging.basicConfig(filename=os.path.join(os.getcwd(), f'Log/{NAME + KEY}.csv'), encoding='utf-8', level=logging.DEBUG)
 # Increasing recursive limit
@@ -22,7 +48,7 @@ Method = {
 }
 
 global N, n_h, n_c, deltas
-deltas = 0.01
+deltas = 0.0001
 N = 50  # Number of particles.
 gamma_h = 1
 gamma_c = 1
@@ -37,7 +63,7 @@ w_f = 30 * gamma_h  # Lasing angular frequency
 # w_1 = 0; w_2 = w_f; w_3 = 150 * gamma_h  # Above lasing threshold
 w_0 = 0
 w_1 = w_f
-w_2 = 150 * gamma_h  # This is the one we change for laser, 34, 37.5, 150 respectively.
+w_2 = 34 * gamma_h  # This is the one we change for laser, 34, 37.5, 150 respectively.
 omega = np.array([w_0, w_1, w_2])  # An array of the "energies" of the levels
 logging.info(f"The computation is done for {NAME}, with the following settings"
 		f"K_bT_c = {K_bT_c}, K_bT_h = {K_bT_h}, gamma_h = {gamma_h}, gamma_c = {gamma_c}"
@@ -55,7 +81,6 @@ n_c = population(w_2 - w_1, K_bT_c)
 
 
 def delta(n_1, n_2) -> int:
-	"""Kronicka-delta function, yields 1 if indexing is the same, else zero."""
 	if n_1 == n_2:
 		return 1
 	else:
@@ -86,9 +111,9 @@ def rhodot(alpha, beta, rho) -> complex:
 		else:
 			return rho[p, s][k, d]
 
-	var = (1/1j * (w_0 * (delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])  # first  #Cdouble-scalar
+	var = (1/1j * (w_0 * (delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])  # first
 			+ w_1 * (delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1])  # second
-			+ w_2 * (delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])  # third  #Cdouble-scalar after ish 670 iterations
+			+ w_2 * (delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])  # third
 			+ w_f * rho[j, m][l, n] * (j - l))  # lasing
 			+ 2 * g * (np.sqrt(j) * delta(m, 0) * minimum(j - 1, 1, l, n)
 			+ np.sqrt(j + 1) * delta(m, 1) * maximum(j + 1, 0, l, n)).imag  # Jaynes - Cumming
@@ -110,7 +135,7 @@ def initialrho(n: int) -> np.array:
 		for m in range(3):
 			for l in range(n):
 				for k in range(3):
-					if m == 1 and k == 1 and j == 0 and l == 0:
+					if m == 1 and k == 1 and j == 1 and l == 1:
 						ten[j, m][l, k] = 1
 	return ten/ten.sum()  # Normalizing
 
@@ -139,7 +164,6 @@ Iterations = []
 
 
 def euler(rho, n):
-	"""Find the evolution of rhodot, in terms of Eulers method."""
 	logging.info(f"Using Euler method")
 	if n > 0:
 		k1 = helper(rho)  # computes rhodot
@@ -155,7 +179,6 @@ def euler(rho, n):
 
 
 def runge(rho, n):
-	"""Find the evolution of rhodot in terms of Runge-Kutta method"""
 	logging.info(f"Using Runge-Kutta method")
 	if not isinstance(rho, (np.ndarray, np.generic)):
 		raise TypeError("Input is of wrong format")

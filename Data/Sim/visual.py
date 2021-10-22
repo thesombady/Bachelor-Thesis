@@ -41,6 +41,7 @@ def plot3(data, path, methodname):
 	plt.xlabel('Time, a.u')
 	plt.ylabel('Energy, a.u')
 	plt.savefig(name2(path))
+	plt.show()
 	plt.clf()
 
 

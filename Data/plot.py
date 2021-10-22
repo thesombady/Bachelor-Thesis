@@ -3,8 +3,10 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-# PATH = "EulerAbove1000_100_2Energy.npy"
-deltas = 0.0001
+PATH = "RungeAbove1000_100_2Energy.npy"
+deltas = 0.001
+N = 50
+Shape = 3 * N
 
 
 def parser(path):
@@ -58,11 +60,11 @@ def plot2(data, n):
 
 def name(path):
 	if "Lasing" in path:
-		return 'w_f = 37.5'
+		return 'w_2 = 37.5'
 	elif "Above" in path:
-		return 'w_f = 150'
+		return 'w_2 = 150'
 	elif "Below" in path:
-		return 'w_f = 34'
+		return 'w_2 = 34'
 	else:
 		raise KeyError(f"No key found")
 
@@ -81,6 +83,34 @@ def plot3(data, path):
 	plt.savefig(name2(path))
 
 
+def name3(path1):
+	"""Used to automate the plotting difference function (plotdiff)"""
+	if 'Lasing' in path1:
+		return 'at lasing threshold'
+	elif 'Above' in path1:
+		return 'above lasing threshold'
+	elif 'Below' in path1:
+		return 'below lasing threshold'
+
+
+def plotdiff(path1, path2):
+	"""Path1 has to be of euler method, path2 has to be of runge-kutta method"""
+	fig, ax = plt.subplots()
+	values1 = parser(path1)
+	values2 = parser(path2)
+	assert len(values1) == len(values2), 'Different lengths'
+	xlist = np.array([i for i in range(len(values1))]) * deltas
+	ax.plot(xlist, values1, '.', markersize=0.8, color='red', label="Euler")
+	ax.plot(xlist, values2, '.', markersize=0.8, color='blue', label="Runge-Kutta")
+	ax.set_xlabel(r'Time, a.u')
+	ax.set_ylabel(r'Energy, a.u')
+	ax.set_title('Average energy comparison of\nEuler-, and Runge-Kutta-method  {}'.format(name3(path1)))
+	plt.legend()
+	plt.show()
+	#plt.savefig()
+
+
+# plot3(parser(PATH), PATH)
 """
 Shape = 3 * 100
 Name = 'EulerAbove1000_100'
@@ -91,5 +121,10 @@ for i in range(len(Data)):
 """
 
 # plot3(parser(PATH), PATH)
+"""
 for file in os.scandir():
 	print(file)
+"""
+Path1 = 'EulerBelow1000_50_0_001Energy.npy'
+Path2 = 'RungeBelow1000_50_0_001Energy.npy'
+plotdiff(Path1, Path2)

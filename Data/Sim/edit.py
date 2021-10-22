@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-PATH = 'RungeAbove1000_100_1.npy'
+PATH = 'EulerBelow1000_50_1Energy.npy'
 N = 100
 os.chdir('..')
 
@@ -32,8 +32,9 @@ def plot(data):
     ax.set_title('Average photon occupancy, above lasing threshold.')
     plt.legend()
     plt.savefig('test.png')
+    plt.show()
     plt.clf()
 
 DATA = parser(PATH)
-plot(occupation(DATA[-1]))
+plot(DATA)
 

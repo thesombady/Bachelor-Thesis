@@ -1,10 +1,11 @@
 import numpy as np
-import sys, os
+import sys
+import os
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 PATH = os.getcwd()
-Name = 'EulerAbove1000_100_1.npy'
+Name = 'RungeBelow1000_50_0_01.npy'
 N = 100
 Shape = 3 * N
 
@@ -18,19 +19,20 @@ def parser(path) -> np.array:
 def plot(data):
     dataset = data.reshape(Shape, -1).real
     plt.imshow(dataset, extent=[0, Shape, 0, Shape], interpolation='bilinear',
-			origin='lower', animated=False, vmin=0, vmax=1)
+            origin='lower', animated=False, vmin=0, vmax=1)
     plt.show()
 
 
-fig, ax = plt.subplots(2,1, figsize=(20, 20))  # plt.figure()
+fig, ax = plt.subplots(2, 1, figsize=(20, 20))
 FPS = 50
 
 path2 = os.path.join(PATH, Name)
 data1 = parser(path2)
 cax1 = ax[0].imshow(data1[0].reshape(Shape, - 1).real, extent=[0, Shape, 0, Shape],
-                 interpolation='bilinear', origin='lower', animated=False, vmin=0, vmax=1)
+                interpolation='bilinear', origin='lower', animated=False, vmin=0, vmax=1,cmap='binary')
 cax2 = ax[1].imshow(data1[0].reshape(Shape, - 1).imag, extent=[0, Shape, 0, Shape],
-                 interpolation='bilinear', origin='lower', animated=False, vmin=0, vmax=data1[-1].imag.sum())
+                interpolation='bilinear', origin='lower', animated=False,
+                vmin=0, vmax=data1[-1].imag.sum(), cmap='binary')
 
 c1 = plt.colorbar(cax1, ax=ax[0], orientation='horizontal', fraction=0.04)
 c2 = plt.colorbar(cax2, ax=ax[1], orientation='horizontal', fraction=0.04)
@@ -47,17 +49,13 @@ def animate(n):
     return fig,
 
 
-ani = FuncAnimation(fig, animate, interval=1, frames=len(data1))
-
-
-def name(path2):
-    name1 = path2.replace('.npy', '.gif')
+def name(path):
+    name1 = path.replace('.npy', '.gif')
     return name1
 
 
+ani = FuncAnimation(fig, animate, interval=1, frames=len(data1))
 try:
-    ani.save(name(path2), fps=FPS, writer = 'pillow', extra_args=['-vcodec', 'libx264'])
-except:
-    ani.save(name(path2), fps=FPS, writer = 'pillow')
-
-
+    ani.save(name(path2), fps=FPS, writer='pillow', extra_args=['-vcodec', 'libx264'])
+except Exception as E:
+    ani.save(name(path2), fps=FPS, writer='pillow')
