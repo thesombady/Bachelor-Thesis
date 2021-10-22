@@ -114,3 +114,4 @@ dmypy.json
 .pyre/
 *.csv
 Data/Data_1mode/EulerAbove100_100.npy
+EulerBelow1000_50_0.01.npy
