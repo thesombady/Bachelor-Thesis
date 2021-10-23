@@ -102,11 +102,13 @@ def plotdiff(path1, path2):
 	xlist = np.array([i for i in range(len(values1))]) * deltas
 	ax.plot(xlist, values1, '.', markersize=0.8, color='red', label="Euler")
 	ax.plot(xlist, values2, '.', markersize=0.8, color='blue', label="Runge-Kutta")
+	"""
 	ax2 = plt.axes([0.5, 0.3, 0.3, 0.3])
 	ax2.plot(xlist, values1, '.', markersize=0.8, color='red', label="Euler")
 	ax2.plot(xlist, values2, '.', markersize=0.8, color='blue', label="Runge-Kutta")
 	ax2.set_ylim([6, 10])
 	ax2.set_xlim([0, 1])
+	"""
 	ax.set_xlabel(r'Time, a.u')
 	ax.set_ylabel(r'Energy, a.u')
 	ax.set_title('Average energy comparison of\nEuler-, and Runge-Kutta-method  {}'.format(name3(path1)))
@@ -130,6 +132,6 @@ for i in range(len(Data)):
 for file in os.scandir():
 	print(file)
 """
-Path1 = 'EulerBelow1000_50_0_01Energy.npy'
-Path2 = 'RungeBelow1000_50_0_01Energy.npy'
+Path1 = 'EulerBelow1000_50_0.01Energy.npy'
+Path2 = 'RungeBelow1000_50_0.01Energy.npy'
 plotdiff(Path1, Path2)

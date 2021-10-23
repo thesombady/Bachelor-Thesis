@@ -3,10 +3,10 @@ import os
 import matplotlib.pyplot as plt
 
 PATH = os.getcwd()
-Name = 'RungeAbove1000_50_0_01.npy.npy'
+Name = 'EulerAbove1000_50_0.01.npy'
 deltas = 0.01
 path1 = os.path.join(PATH, Name)
-N = 100
+N = 50
 Shape = 3 * N
 gamma_h = 1
 gamma_c = 1
@@ -80,14 +80,14 @@ def energy(data1, n) -> complex:
                         rho0[j, m][l - 1, 1] = val3
                         val4 = np.sqrt(l + 1) * delta(n, 1) * g * hbar * val
                         rho0[j, m][l + 1, 0] = val4
-    return rho0.reshape(3 * N, -1).trace()
+    return rho0.reshape(3 * N, - 1).trace()
 
 
 def entropy(data1, n) -> complex:
     """Computes the Von-Nuemann entropy of the density matrix"""
     dataset = data1[n]
     data2 = dataset * np.log(dataset)
-    return data2.reshape(3 * N, -1).trace()
+    return data2.reshape(3 * N, - 1).trace()
 
 
 def name1(path2):

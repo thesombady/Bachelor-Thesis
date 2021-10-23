@@ -5,7 +5,7 @@ import os
 np.set_printoptions(precision=5, suppress=True, threshold=81)
 
 itera = 1000
-N = 50  # Number of particles.
+N = 10  # Number of particles.
 
 
 def parser():
@@ -103,10 +103,26 @@ def rhodot(alpha, beta, rho) -> complex:
 		else:
 			return rho[p, s][k, d]
 
+	def maximum2(p, s, k, d) -> complex:
+		"""Returning the null-state
+		a^\dagger|a> = 0 * |null> if a is the boundary."""
+		if p == N or k == N:
+			return rho[0, s + 1][k, d]
+		else:
+			return rho[p, s][k, d]
+
+
+	def minimum2(p, s, k, d) -> complex:
+		"""Returning the null-state a|0> = 0 * |null>."""
+		if p == -1 or k == -1:
+			return rho[0, s - 1][k, d]
+		else:
+			return rho[p, s][k, d]
+	"""
 	var = (1/1j * (w_0 * (delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])  # first
 			+ w_1 * (delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1])  # second
 			+ w_2 * (delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])  # third
-			+ w_f * rho[j, m][l, n] * (j - l))  # lasing
+			+ w_f * rho[j, m][l, n] * (j - l))  # coupling
 			+ 2 * g * (np.sqrt(j) * delta(m, 0) * minimum(j - 1, 1, l, n)
 			+ np.sqrt(j + 1) * delta(m, 1) * maximum(j + 1, 0, l, n)).imag  # Jaynes - Cumming
 			+ gamma_h * (n_h + 1) * (2 * delta(n, 0) * delta(m, 0) * rho[j, 2][l, 2]
@@ -117,6 +133,22 @@ def rhodot(alpha, beta, rho) -> complex:
 			- delta(m, 2) * rho[j, 2][l, 2] - delta(n, 2) * rho[j, m][l, 2])
 			+ gamma_c * n_c * (2 * delta(m, 2) * delta(n, 2) * rho[j, 1][l, 1]
 			- delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1]))  # Cold - Liouvillian
+	"""
+	var = (1/1j * (w_0 * (delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])  # first
+			+ w_1 * (delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1])  # second
+			+ w_2 * (delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])  # third
+			+ w_f * rho[j, m][l, n] * (j - l))  # coupling
+			+ 2 * g * (np.sqrt(j) * delta(m, 0) * minimum2(j - 1, 1, l, n)
+			+ np.sqrt(j + 1) * delta(m, 1) * maximum2(j + 1, 0, l, n)).imag  # Jaynes - Cumming
+			+ gamma_h * (n_h + 1) * (2 * delta(n, 0) * delta(m, 0) * rho[j, 2][l, 2]
+			- delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])
+			+ gamma_h * n_h * (2 * delta(m, 2) * delta(n, 2) * rho[j, 0][l, 0]
+			- delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])  # Hot - Liouvillian
+			+ gamma_c * (n_c + 1) * (2 * delta(m, 1) * delta(n, 1) * rho[j, 2][l, 2]
+			- delta(m, 2) * rho[j, 2][l, 2] - delta(n, 2) * rho[j, m][l, 2])
+			+ gamma_c * n_c * (2 * delta(m, 2) * delta(n, 2) * rho[j, 1][l, 1]
+			- delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1]))  # Cold - Liouvillian
+	# print(var, j, m, l, n)
 	return var
 
 
@@ -143,13 +175,13 @@ def helper(rho) -> np.array:
 	to iterate either with euler,
 	Runge-Kutta method, in order to solve a first order differential equation at time t."""
 	rho1 = zerorho(n=N)
-	for m in range(3):
-		for j in range(N):
-			for n in range(3):
-				for l in range(N):
+	for j in range(N):
+		for m in range(3):
+			for l in range(N):
+				for n in range(3):
 					var = rhodot([j, m], [l, n], rho)
 					rho1[j, m][l, n] = var
-	assert (Iterations[-1].reshape(3 * N, -1) ** 2).all() == Iterations[-1].reshape(3 * N, -1).all(), 'Failed computation'
+	assert (rho1.reshape(3 * N, -1, order='F') ** 2).all() == rho1.reshape(3 * N, -1, order='F').all(), 'Failed computation'
 	return rho1
 
 
@@ -160,7 +192,7 @@ def euler(rho, n):
 	if n > 0:
 		k1 = helper(rho)  # computes rhodot
 		rho1 = rho + k1 * deltas
-		print(f'Iteration:{n}', rho.reshape(3 * N, - 1).trace())
+		print(f'Iteration:{n}', rho.reshape(3 * N, - 1, order='F').trace())
 		Iterations.append(rho1)
 		euler(rho1, n - 1)
 	else:
@@ -179,7 +211,7 @@ def runge(rho, n):
 		k4 = helper(rho + deltas * k3)
 		rho1 = rho + (k1 + 2 * k2 + 2 * k3 + k4) * deltas / 6
 		Iterations.append(rho1)
-		print(rho.reshape(3 * N, -1).trace(), n)
+		print(rho.reshape(3 * N, -1, order='F').trace(), n)
 		runge(rho1, n - 1)
 	else:
 		path = os.path.join(os.getcwd(), f'Runge{NAME}{str(itera)}_{N}_{deltas}.npy')
@@ -194,3 +226,4 @@ try:
 	Method[KEY](Rho0, itera)
 except:
 	raise Exception('Error in computing the time-evolution')
+# print(Iterations[-1].reshape(3 * N, - 1))

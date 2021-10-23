@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 
-os.chdir('..')
+# os.chdir('..')
 PATH = os.getcwd()
-Name = 'RungeAbove1000_3_0.01.npy'
-N = 3
+Name = 'EulerAbove1000_10_0.01.npy'
+N = 10
 Shape = 3 * N
 
 
@@ -20,7 +20,7 @@ def parser(path) -> np.array:
 
 def plot(data):
     dataset = data.reshape(Shape, -1).real
-    plt.imshow(dataset, extent=[0, Shape, 0, Shape], interpolation='bilinear',
+    plt.imshow(dataset, extent=[0, Shape, 0, Shape],
             origin='lower', animated=False, vmin=0, vmax=1)
     plt.show()
 
@@ -30,9 +30,9 @@ FPS = 50
 
 path2 = os.path.join(PATH, Name)
 data1 = parser(path2)
-cax1 = ax[0].imshow(data1[0].reshape(Shape, - 1).real, extent=[0, Shape, 0, Shape],
+cax1 = ax[0].imshow(data1[0].reshape(Shape, - 1, order='F').real, extent=[0, Shape, 0, Shape],
                 origin='lower', animated=False, vmin=0, vmax=1e-2, cmap='binary')
-cax2 = ax[1].imshow(data1[0].reshape(Shape, - 1).imag, extent=[0, Shape, 0, Shape],
+cax2 = ax[1].imshow(data1[0].reshape(Shape, - 1, order='F').imag, extent=[0, Shape, 0, Shape],
                 origin='lower', animated=False,
                 vmin=0, vmax=1e-4, cmap='binary')
 
@@ -41,13 +41,13 @@ c2 = plt.colorbar(cax2, ax=ax[1], orientation='horizontal', fraction=0.04)
 
 
 def animate(n):
-    dataset = data1[n].reshape(Shape, - 1)
+    dataset = data1[n].reshape(Shape, - 1, order='F')
     fig.suptitle(f'Iteration {n}')
     im1 = cax1.set_array(dataset.real)
     ax[0].set_title('Real')
     im2 = cax2.set_array(dataset.imag)
     ax[1].set_title('Imaginary')
-    print(n, dataset.imag.sum())
+    print(n)
     return fig,
 
 
