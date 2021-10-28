@@ -3,10 +3,10 @@ import os
 import matplotlib.pyplot as plt
 
 PATH = os.getcwd()
-Name = 'EulerAbove1000_50_0.01.npy'
-deltas = 0.01
+Name = 'EulerAbove250_25_0.04.npy'
+deltas = 0.002
 path1 = os.path.join(PATH, Name)
-N = 50
+N = 25
 Shape = 3 * N
 gamma_h = 1
 gamma_c = 1

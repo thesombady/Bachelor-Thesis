@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-PATH = 'RungeAbove1000_50_0.01.npy'
+PATH = 'Sim/RungeAbove1000_50_0.01.npy'
 PATH = os.path.join(os.getcwd(), PATH)
 N = 50
 os.chdir('..')
