@@ -7,9 +7,10 @@ from matplotlib.animation import FuncAnimation
 
 # os.chdir('..')
 PATH = os.getcwd()
-Name = 'EulerAbove1000_10_0.01.npy'
+Name = 'RungeAbove10000_10_0.01.npy'
 N = 10
 Shape = 3 * N
+delta = 0.01
 
 
 def parser(path) -> np.array:
@@ -41,8 +42,9 @@ c2 = plt.colorbar(cax2, ax=ax[1], orientation='horizontal', fraction=0.04)
 
 
 def animate(n):
+    n = n * 9
     dataset = data1[n].reshape(Shape, - 1, order='F')
-    fig.suptitle(f'Iteration {n}')
+    fig.suptitle(f'Time {n * delta}')
     im1 = cax1.set_array(dataset.real)
     ax[0].set_title('Real')
     im2 = cax2.set_array(dataset.imag)
@@ -56,7 +58,7 @@ def name(path):
     return name1
 
 
-ani = FuncAnimation(fig, animate, interval=1, frames=len(data1))
+ani = FuncAnimation(fig, animate, interval=1, frames=int(len(data1)/10))
 try:
     ani.save(name(path2), fps=FPS, writer='pillow', extra_args=['-vcodec', 'libx264'])
 except Exception as E:

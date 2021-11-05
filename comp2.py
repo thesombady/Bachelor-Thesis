@@ -4,8 +4,8 @@ import sys
 import os
 np.set_printoptions(precision=5, suppress=True, threshold=81)
 
-itera = 250
-N = 25  # Number of particles.
+itera = 2000
+N = 3  # Number of particles.
 
 
 def parser():
@@ -118,6 +118,7 @@ def rhodot(alpha, beta, rho) -> complex:
         else:
             return rho[p, s][k, d]
 
+
     var = (1/1j * (w_0 * (delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])  # first
             + w_1 * (delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1])  # second
             + w_2 * (delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])  # third
@@ -132,23 +133,6 @@ def rhodot(alpha, beta, rho) -> complex:
             - delta(m, 2) * rho[j, 2][l, 2] - delta(n, 2) * rho[j, m][l, 2])
             + gamma_c * n_c * (2 * delta(m, 2) * delta(n, 2) * rho[j, 1][l, 1]
             - delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1]))  # Cold - Liouvillian
-    """
-    var = (1/1j * (w_0 * (delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])  # first
-            + w_1 * (delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1])  # second
-            + w_2 * (delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])  # third
-            + w_f * rho[j, m][l, n] * (j - l))  # coupling
-            + 2 * g * (np.sqrt(j) * delta(m, 0) * minimum2(j - 1, 1, l, n)
-            + np.sqrt(j + 1) * delta(m, 1) * maximum2(j + 1, 0, l, n)).imag  # Jaynes - Cumming
-            + gamma_h * (n_h + 1) * (2 * delta(n, 0) * delta(m, 0) * rho[j, 2][l, 2]
-            - delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])
-            + gamma_h * n_h * (2 * delta(m, 2) * delta(n, 2) * rho[j, 0][l, 0]
-            - delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])  # Hot - Liouvillian
-            + gamma_c * (n_c + 1) * (2 * delta(m, 1) * delta(n, 1) * rho[j, 2][l, 2]
-            - delta(m, 2) * rho[j, 2][l, 2] - delta(n, 2) * rho[j, m][l, 2])
-            + gamma_c * n_c * (2 * delta(m, 2) * delta(n, 2) * rho[j, 1][l, 1]
-            - delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1]))  # Cold - Liouvillian
-    # print(var, j, m, l, n)
-    """
     return var
 
 
@@ -181,7 +165,8 @@ def helper(rho) -> np.array:
                 for n in range(3):
                     var = rhodot([j, m], [l, n], rho)
                     rho1[j, m][l, n] = var
-    assert (rho1.reshape(3 * N, -1, order='F') ** 2).all() == rho1.reshape(3 * N, -1, order='F').all(), 'Failed computation'
+    tester = rho1.reshape(3 * N, -1, order='F')
+    # assert np.matmul(tester, tester).all() == tester.all(), 'Failed computation'
     return rho1
 
 
@@ -208,6 +193,7 @@ def euler2(rho, n):
         rho1 = rhos[-1] + helper(rhos[-1]) * deltas
         rhos.append(rho1)
         print(f'Iteration:{i}', rhos[-1].reshape(3 * N, - 1, order='F').trace())
+        #  progressbar(i)
     path = os.path.join(os.getcwd(), f'Euler{NAME}{str(itera)}_{N}_{deltas}.npy')
     with open(path, 'wb') as file:
         np.save(file, np.array(rhos))
@@ -245,6 +231,19 @@ def runge2(rho, n):
     path = os.path.join(os.getcwd(), f'Runge{NAME}{str(itera)}_{N}_{deltas}.npy')
     with open(path, 'wb') as file:
         np.save(file, np.array(rhos))
+
+
+def progressbar(func, iteration, prefix='', suffix='', decimals=1, fill = '█', length = 1000, printEnd="\r"):
+    if not callable(func):
+        sys.exit()
+
+    def printprogress(iteration):
+        precent = (f"{100 * iteration/N}"+str(decimals))
+        filledlength = int(length * iteration // N)
+        bar = fill * filledlength + '-' * (length - filledlength)
+        print(f'\r{prefix}|{bar}| {precent}% {suffix}', end=printEnd)
+    printprogress(iteration)
+
 
 
 start = time.time()

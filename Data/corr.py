@@ -3,7 +3,7 @@ import os
 import matplotlib.pyplot as plt
 
 PATH = os.getcwd()
-Name = 'EulerAbove250_25_0.04.npy'
+Name = 'RungeAbove250_25_0.04.npy'
 deltas = 0.002
 path1 = os.path.join(PATH, Name)
 N = 25

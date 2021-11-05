@@ -1,41 +1,22 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-PATH = 'Sim/RungeAbove1000_50_0.01.npy'
+PATH = 'EulerAbove250_25_0.04.npy'
 PATH = os.path.join(os.getcwd(), PATH)
-N = 50
-os.chdir('..')
-os.chdir('..')
+N =25
 
 
 def occupation(data):
-    list1 = np.zeros(N, dtype=complex)
-    list2 = np.zeros(N)
+    zero = np.full((N, 3, N, 3), 0, dtype=complex)
     for j in range(N):
         for m in range(3):
             for l in range(N):
                 for n in range(3):
-                    val1 = data[j, m][l, n].real * l + data[j, m][l, n].imag
-                    list1[l] += val1
-                    val2 = data[j, m][l, n].real * j + data[j, m][l, n].imag
-                    list2[j] += val2
-    return (list1 + list2)/sum(list1 + list2)
-
-
-def occupation2(rho):
-    val_list = np.zeros(N)
-    for m in range(3):
-        for j in range(N):
-            for n in range(3):
-                for l in range(N):
-                    val = rho[j, m][l, n] * l
-                    val_list[l] += val.real + val.imag
-                    if val != 0j:
-                        print(j, m, l, n)
-                        print(val)
-    print(val_list)
-    return val_list
-
+                    if n == 1 or m == 1:
+                        zero[j, m][l, n] = data[j, m][l, n] * l
+                    else:
+                        zero[j, m][l, n] = 0
+    return zero.reshape(3 * N, -1, order='F').trace().real
 
 
 def parser(path):
@@ -50,7 +31,7 @@ def plot2(data):
     plt.show()
 
 
-def plot(data):
+def plot(data, xlist):
     fig, ax = plt.subplots()
     xlist = [i for i in range(len(data))]
     ax.bar(xlist, data, label='Average photon occupancy')
@@ -61,5 +42,10 @@ def plot(data):
     plt.show()
     plt.clf()
 
+
+def plotmaker(data):
+    dataset = [occupation(data[i]) for i in range(len(data))]
+    plot(dataset, [i for i in range(N)])
+
 DATA = parser(PATH)
-occupation2(DATA[50])
+plotmaker(DATA)

@@ -117,6 +117,56 @@ def plotdiff(path1, path2):
 	#plt.savefig()
 
 
+def plote(data1, data2, data3, data4, data5, data6, data7, data8):
+	fig, ax = plt.subplots(2, 1, figsize=(8, 7))
+	xlist1 = np.array([i * 0.01 for i in range(len(data1))])
+	xlist2 = np.array([i * 0.001 for i in range(len(data3))])
+	xlist3 = np.array([i * 0.02 for i in range(len(data5))])
+	xlist4 = np.array([i * 0.04 for i in range(len(data7))])
+	fig.tight_layout(pad=3.0)
+	ax[0].plot(xlist3, data5, '--', markersize=1, label=r'Euler, $\Delta t = 0.02$', color='blue')
+	ax[0].plot(xlist3, data6, '-', markersize=1, label=r'Runge, $\Delta t = 0.02$', color='lightskyblue')
+	ax[0].plot(xlist1, data1, '--', markersize=1, label=r'Euler, $\Delta t = 0.01$', color='red')
+	ax[0].plot(xlist1, data2, '-', markersize=1, label=r'Runge, $\Delta t = 0.01$', color='coral')
+	ax[0].plot(xlist2, data3, '--', markersize=1, label=r'Euler, $\Delta t = 0.001$', color='green')
+	ax[0].plot(xlist2, data4, '-', markersize=1, label=r'Runge, $\Delta t = 0.001$', color='limegreen')
+	ax[0].plot(xlist4, data7, '--', markersize=1, label=r'Euler $\Delta t = 0.04$', color='darkgrey')
+	ax[0].plot(xlist4, data8, '-', markersize=1, label=r'Runge $\Delta t = 0.04$', color='gray')
+	ax[1].plot(xlist3, data5, '--', markersize=1, label=r'Euler, $\Delta t = 0.02$', color='blue')
+	ax[1].plot(xlist3, data6, '-', markersize=1, label=r'Runge, $\Delta t = 0.02$', color='lightskyblue')
+	ax[1].plot(xlist1, data1, '--', markersize=1, label=r'Euler, $\Delta t = 0.01$', color='red')
+	ax[1].plot(xlist1, data2, '-', markersize=1, label=r'Runge, $\Delta t = 0.01$', color='coral')
+	ax[1].plot(xlist2, data3, '--', markersize=1, label=r'Euler, $\Delta t = 0.001$', color='green')
+	ax[1].plot(xlist2, data4, '-', markersize=1, label=r'Runge, $\Delta t = 0.001$', color='limegreen')
+	ax[1].plot(xlist4, data7, '--', markersize=1, label=r'Euler $\Delta t = 0.04$', color='darkgrey')
+	ax[1].plot(xlist4, data8, '-', markersize=1, label=r'Runge $\Delta t = 0.04$', color='gray')
+	ax[0].set_ylim(0, 3.1)
+	ax[1].set_xlim(0, 1.5)
+	ax[1].set_ylim(1.5, 3.1)
+	ax[0].set_title('Comparison of Euler and Runge-Kutta')
+	ax[1].set_title('Zoomed on problimatic area')
+	ax2 = plt.axes([0.4, 0.175, 0.3, 0.2])
+	ax2.plot(xlist3, data5, '--', markersize=1, label=r'Euler, $\Delta t = 0.02$', color='blue')
+	ax2.plot(xlist3, data6, '-', markersize=1, label=r'Runge, $\Delta t = 0.02$', color='lightskyblue')
+	ax2.plot(xlist1, data1, '--', markersize=1, label=r'Euler, $\Delta t = 0.01$', color='red')
+	ax2.plot(xlist1, data2, '-', markersize=1, label=r'Runge, $\Delta t = 0.01$', color='coral')
+	ax2.plot(xlist2, data3, '--', markersize=1, label=r'Euler, $\Delta t = 0.001$', color='green')
+	ax2.plot(xlist2, data4, '-', markersize=1, label=r'Runge, $\Delta t = 0.001$', color='limegreen')
+	ax2.plot(xlist4, data7, '--', markersize=1, label=r'Euler $\Delta t = 0.04$', color='darkgrey')
+	ax2.plot(xlist4, data8, '-', markersize=1, label=r'Runge $\Delta t = 0.04$', color='gray')
+	# ax2.legend(loc=4)
+	ax2.set_xlim(0.3, 0.8)
+	ax2.set_ylim(2.5, 3.1)
+	ax2.set_ylabel(r'$\langle E \rangle, ~ \hbar\omega_f$')
+	ax2.set_ylabel(r'$\langle E \rangle, ~ \hbar\omega_f$')
+	for axes in ax:
+		axes.set_xlabel(r'Time, $\gamma_h$s')
+		axes.set_ylabel(r'$\langle E \rangle, ~ \hbar\omega_f$')
+		axes.legend(loc=4)
+	plt.show()
+	plt.clf()
+
+
 # plot3(parser(PATH), PATH)
 """
 Shape = 3 * 100
@@ -132,6 +182,15 @@ for i in range(len(Data)):
 for file in os.scandir():
 	print(file)
 """
-Path1 = 'EulerBelow1000_50_0.01Energy.npy'
-Path2 = 'RungeBelow1000_50_0.01Energy.npy'
-plotdiff(Path1, Path2)
+Path1 = 'EulerAbove1000_25_0.01Energy.npy'
+Path2 = 'RungeAbove1000_25_0.01Energy.npy'
+Path3 = 'EulerAbove10000_25_0.001Energy.npy'
+Path4 = 'RungeAbove10000_25_0.001Energy.npy'
+Path5 = 'RungeAbove500_25_0.02Energy.npy'
+Path6 = 'EulerAbove500_25_0.02Energy.npy'
+Path7 = 'EulerAbove250_25_0.04Energy.npy'
+Path8 = 'RungeAbove250_25_0.04Energy.npy'
+# plotdiff(Path1, Path2)
+plote(parser(Path1), parser(Path2), parser(Path3), parser(Path4), parser(Path5), parser(Path6),
+	parser(Path7), parser(Path8))
+
