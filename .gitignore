@@ -115,3 +115,6 @@ dmypy.json
 *.csv
 Data/Data_1mode/EulerAbove100_100.npy
 Data/Sim/EulerBelow1000_50_0.01.npy
+*.npy
+*.gif
+
