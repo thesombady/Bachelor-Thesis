@@ -3,10 +3,10 @@ import os
 import matplotlib.pyplot as plt
 
 PATH = os.getcwd()
-Name = 'RungeAbove250_25_0.04.npy'
+Name = 'EulerAbove2000_3_0.02_2.npy'
 deltas = 0.002
 path1 = os.path.join(PATH, Name)
-N = 25
+N = 3
 Shape = 3 * N
 gamma_h = 1
 gamma_c = 1
@@ -51,6 +51,42 @@ def delta(n_1, n_2) -> int:
         return 1
     else:
         return 0
+
+
+def energy2(data1, n) -> float:
+    """Returns the energy, in terms of <E> = Tr(Rho * H)"""
+    rho = data1[n]
+    rho0 = np.full((N, 3, N, 3), 0, dtype=complex)
+
+    def maximum(p, s, k, d) -> complex:
+        """Returning the null-state
+        a^\dagger|a> = 0 * |null> if a is the boundary."""
+        if p == N or k == N:
+            return 0
+        else:
+            return rho[p, s][k, d]
+
+    def minimum(p, s, k, d) -> complex:
+        """Returning the null-state a|0> = 0 * |null>."""
+        if p == -1 or k == -1:
+            return 0
+        else:
+            return rho[p, s][k, d]
+
+    for j in range(N):
+        for m in range(3):
+            for l in range(N):
+                for n in range(3):
+                    val = hbar * (
+                        w_0 * rho[j, m][l, 0] + w_1 * rho[j, m][l, 1] + w_2 * rho[j, m][l, 2]
+                        + w_f * l * rho[j, m][l, n]
+                        + g * (
+                            np.sqrt(l + 1) * delta(n, 1) * maximum(j, m, l + 1, 0)
+                            + np.sqrt(l) * delta(n, 0) * minimum(j, m, l - 1, 1)
+                        )
+                    )
+                    rho0[j, m][l, n] = val
+    return rho0.reshape(3 * N, - 1, order='F').trace()
 
 
 def energy(data1, n) -> complex:
@@ -115,7 +151,7 @@ data = parser(path1)
 value = []
 xlist = [i * deltas for i in range((len(data)))]
 for i in range(len(data)):
-    vals = energy(data, i)
+    vals = energy2(data, i)
     print(vals, i)
     value.append(vals.real)
 

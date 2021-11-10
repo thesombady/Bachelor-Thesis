@@ -4,8 +4,8 @@ import sys
 import os
 np.set_printoptions(precision=5, suppress=True, threshold=81)
 
-itera = 2000
-N = 3  # Number of particles.
+itera = 1000
+N = 5  # Number of particles.
 
 
 def parser():
@@ -41,7 +41,6 @@ KEY, deltas, NAME, w_2 = parser()
 # KEY = 'Runge'
 
 # Increasing recursive limit
-sys.setrecursionlimit(100000)
 
 Method = {
     'Euler': lambda rho, n: euler2(rho, n),
@@ -103,36 +102,76 @@ def rhodot(alpha, beta, rho) -> complex:
         else:
             return rho[p, s][k, d]
 
-    def maximum2(p, s, k, d) -> complex:
-        """Returning the null-state
-        a^\dagger|a> = 0 * |null> if a is the boundary."""
-        if p == N or k == N:
-            return rho[0, s + 1][k, d]
-        else:
-            return rho[p, s][k, d]
-
-    def minimum2(p, s, k, d) -> complex:
-        """Returning the null-state a|0> = 0 * |null>."""
-        if p == -1 or k == -1:
-            return rho[0, s - 1][k, d]
-        else:
-            return rho[p, s][k, d]
-
-
+    """
     var = (1/1j * (w_0 * (delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])  # first
             + w_1 * (delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1])  # second
             + w_2 * (delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])  # third
             + w_f * rho[j, m][l, n] * (j - l))  # coupling
-            + 2 * g * (np.sqrt(j) * delta(m, 0) * minimum(j - 1, 1, l, n)
+            - 2 * g * (np.sqrt(j) * delta(m, 0) * minimum(j - 1, 1, l, n)  # might be plus
             + np.sqrt(j + 1) * delta(m, 1) * maximum(j + 1, 0, l, n)).imag  # Jaynes - Cumming
             + gamma_h * (n_h + 1) * (2 * delta(n, 0) * delta(m, 0) * rho[j, 2][l, 2]
             - delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])
             + gamma_h * n_h * (2 * delta(m, 2) * delta(n, 2) * rho[j, 0][l, 0]
             - delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])  # Hot - Liouvillian
             + gamma_c * (n_c + 1) * (2 * delta(m, 1) * delta(n, 1) * rho[j, 2][l, 2]
-            - delta(m, 2) * rho[j, 2][l, 2] - delta(n, 2) * rho[j, m][l, 2])
+            - delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])
             + gamma_c * n_c * (2 * delta(m, 2) * delta(n, 2) * rho[j, 1][l, 1]
             - delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1]))  # Cold - Liouvillian
+    """
+
+    var = (
+        - 1j * (w_0 * (delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])
+               + w_1 * (delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1])
+               + w_2 * (delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])
+               + w_f * rho[j, m][l, n] * (j - l)
+               + g * (np.sqrt(j) * delta(m, 0) * minimum(j - 1, 1, l, n)
+                    + np.sqrt(j + 1) * delta(m, 1) * maximum(j + 1, 0, l, n)
+                    - np.sqrt(l) * delta(n, 0) * minimum(j, m, l - 1, 1)
+                    - np.sqrt(l + 1) * delta(n, 1) * maximum(j, m, l + 1, 0)))
+        + gamma_h * (n_h + 1) * (
+        2 * delta(n, 0) * delta(m, 0) * rho[j, 2][l, 2]
+        - delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2]
+        )
+        + gamma_h * n_h * (
+        2 * delta(m, 2) * delta(n, 2) * rho[j, 0][l, 0]
+        - delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0]
+        )
+        + gamma_c * (n_c + 1) * (
+        2 * delta(m, 1) * delta(n, 1) * rho[j, 2][l, 2]
+        - delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2]
+        )
+        + gamma_c * n_c * (
+        2 * delta(m, 2) * delta(n, 2) * rho[j, 1][l, 1]
+        - delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1]
+        )
+    )
+
+    """
+    var = (
+            - 1j * (w_0 * (delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])
+                    + w_1 * (delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1])
+                    + w_2 * (delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])
+                    + w_f * rho[j, m][l, n] * (j - l))
+                    - 2 * g * (np.sqrt(j) * delta(m, 0) * minimum(j - 1, 1, l, n)
+                           + np.sqrt(j + 1) * delta(m, 1) * maximum(j + 1, 0, l, n)).imag
+            + gamma_h * (n_h + 1) * (
+                    2 * delta(n, 0) * delta(m, 0) * rho[j, 2][l, 2]
+                    - delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2]
+            )
+            + gamma_h * n_h * (
+                    2 * delta(m, 2) * delta(n, 2) * rho[j, 0][l, 0]
+                    - delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0]
+            )
+            + gamma_c * (n_c + 1) * (
+                    2 * delta(m, 1) * delta(n, 1) * rho[j, 2][l, 2]
+                    - delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2]
+            )
+            + gamma_c * n_c * (
+                    2 * delta(m, 2) * delta(n, 2) * rho[j, 1][l, 1]
+                    - delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1]
+            )
+    )
+    """
     return var
 
 
@@ -143,7 +182,7 @@ def initialrho(n: int) -> np.array:
         for m in range(3):
             for l in range(n):
                 for k in range(3):
-                    if m == 0 and k == 0 and j == 1 and l == 1:
+                    if m == 0 and k == 0 and j == 0 and l == 0:
                         ten[j, m][l, k] = 1
     return ten/ten.sum()  # Normalizing
 
@@ -166,7 +205,7 @@ def helper(rho) -> np.array:
                     var = rhodot([j, m], [l, n], rho)
                     rho1[j, m][l, n] = var
     tester = rho1.reshape(3 * N, -1, order='F')
-    # assert np.matmul(tester, tester).all() == tester.all(), 'Failed computation'
+    assert np.matmul(tester, tester).all() == tester.all(), 'Failed computation'
     return rho1
 
 
@@ -179,6 +218,8 @@ def euler(rho, n):
         rho1 = rho + k1 * deltas
         print(f'Iteration:{n}', rho1.reshape(3 * N, - 1, order='F').trace())
         Iterations.append(rho1)
+        tester = rho1.reshape(3 * N, - 1, order='F')
+        assert np.matmul(tester, tester).all() == tester.all(), 'Failed computation'
         euler(rho1, n - 1)
     else:
         path = os.path.join(os.getcwd(), f'Euler{NAME}{str(itera)}_{N}_{deltas}.npy')
@@ -192,7 +233,11 @@ def euler2(rho, n):
     for i in range(n):
         rho1 = rhos[-1] + helper(rhos[-1]) * deltas
         rhos.append(rho1)
-        print(f'Iteration:{i}', rhos[-1].reshape(3 * N, - 1, order='F').trace())
+        tester = rhos[-1].reshape(3 * N, - 1, order='F')
+        print(f'Trace Iteration:{i}', tester.trace())
+        print(f'Iteration:{i}', 'Imag', np.amin(tester.imag), np.amax(tester.imag),
+              'Real', np.amin(tester.real), np.amax(tester.real))
+        # print(np.linalg.det(tester))
         #  progressbar(i)
     path = os.path.join(os.getcwd(), f'Euler{NAME}{str(itera)}_{N}_{deltas}.npy')
     with open(path, 'wb') as file:
@@ -227,7 +272,8 @@ def runge2(rho, n):
         k4 = helper(rhos[-1] + deltas * k3)
         rho1 = rhos[-1] + (k1 + 2 * k2 + 2 * k3 + k4) * deltas / 6
         rhos.append(rho1)
-        print(rho1.reshape(3 * N, -1, order='F').trace(), i)
+        print(f'Iteration:{i}', rhos[-1].reshape(3 * N, - 1, order='F').trace())
+        print(f'Iteration:{i}', np.amax(rhos[-1]).real, np.amax(rho[-1]).imag, i)
     path = os.path.join(os.getcwd(), f'Runge{NAME}{str(itera)}_{N}_{deltas}.npy')
     with open(path, 'wb') as file:
         np.save(file, np.array(rhos))

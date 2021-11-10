@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-N = 25
+N = 5
 Shape = 3 * N
 
 
@@ -32,5 +32,7 @@ def plot2(data, n):
     plt.show()
 
 
-Path = 'RungeAbove10000_25_0.001.npy'
-plot2(parser(Path), 5001)
+Path = 'EulerAbove1000_5_0.01.npy'
+#plot2(parser(Path), 5001)
+Data = parser(Path)[-1].real
+print(np.amin(Data))

@@ -30,6 +30,26 @@ def plotmax(data, deltas, path):
     plt.show()
 
 
+def parsname(path):
+    if 'Euler' in path:
+        return 'Euler'
+    else:
+        return 'Runge'
+
+
+def plotmax2(datas, deltas):
+    fig, ax = plt.subplots(1, 1, figsize=(5, 5))
+    for data in datas:
+        xlist = np.array([i * deltas for i in range(len(parser(data)))], dtype=object)
+        data2 = parser(data).real
+        maxreal = np.array([np.amax(data2[i]) for i in range(len(data2))], dtype=object)
+        #  ax.plot(xlist, maxreal, '-', markersize=1, label=parsname(data)+str(deltas))
+        print(xlist[-1])
+    # plt.legend()
+    # plt.show()
+
+
+
 def findfiles():
     files = []
     deltas = []
@@ -45,6 +65,10 @@ def findfiles():
                     deltas.append(0.02)
                 elif '0.001' in filename:
                     deltas.append(0.001)
+                elif '0.05' in filename:
+                    deltas.append(0.05)
+                elif '0.1' in filename:
+                    deltas.append(0.1)
                 else:
                     raise KeyError(
                         'Could not match delta'
@@ -52,11 +76,22 @@ def findfiles():
             else:
                 pass
     assert len(files) == len(deltas), 'missmatch'
-    for i in range(len(files)):
-        plotmax(parser(files[i]), deltas[i], files[i])
+    plotmax2(files, deltas)
+
+
+def occupation(rho):
+    zero = np.full((N, 3, N, 3), 0, dtype=complex)
+    for j in range(N):
+        for m in range(3):
+            for l in range(N):
+                for n in range(3):
+                    zero[j, m][l, n] = j * rho[j, m][l, n]
+    return zero.reshape(3 * N, - 1, order='F').trace()
+
 
 
 # findfiles()
+"""
 Path = 'EulerAbove2000_3_0.01.npy'
 data = parser(Path)[1225]  # .reshape(Size, - 1, order='F')
 for j in range(3):
@@ -65,4 +100,10 @@ for j in range(3):
             for n in range(3):
                 if data[j, m][l, n].real > 1:
                     print((j, m), (l, n))
+"""
+Path = 'EulerAbove1000_20_0.1.npy'
+Data = parser(Path)
+vals = [occupation(Data[i]) for i in range(len(Data))]
+for val in vals:
+    print(val)
 
