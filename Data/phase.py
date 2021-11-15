@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-N = 20
+N = 5
 Size = 3 * N
 
 w_2 = 0
@@ -20,7 +20,7 @@ def parser(path) -> np.array:
     return data1
 
 
-gamma_h = 1
+gamma_h = 1  # 10 ** (-8)  # might have to use something similar
 hbar = 1
 g = 5 * gamma_h
 w_f = 30 * gamma_h
@@ -133,26 +133,96 @@ def alpha(rho):
         else:
             return rho[p, s][k, d]
 
-    rho0 = np.full((N, 3, N, 3), 0, dtype = float)
+    rhox = np.full((N, 3, N, 3), 0, dtype=complex)
+    rhop = np.full((N, 3, N, 3), 0, dtype=complex)
     for j in range(N):
         for m in range(3):
             for l in range(N):
                 for n in range(3):
-                    val1 = k * (
-                        maximum(j + 1, m, l, n) * np.sqrt(j + 1) + minimum(j - 1, m, l, n)
+                    valx = (
+                        minimum(j - 1, m, l, n) * np.sqrt(j)
+                        #  + maximum(j + 1, m , l, n) * np.sqrt(j + 1)
                     )
-                    val2 = k * (
-                        maximum(j + 1, m, l, n) * np.sqrt(j + 1) - minimum(j - 1, m, l, n)
+                    valp = (
+                        maximum(j + 1, m, l, n) * np.sqrt(j + 1)
+                        #  - minimum(j - 1, m, l, n) * np.sqrt(j)
                     )
-                    rho0[j, m][l, n] = val1.real + val2.imag
-    return plot(rho0)
+
+                    rhox[j, m][l, n] = valx
+                    rhop[j, m][l, n] = valp
+    return plotish2(rhox.reshape(3 * N, - 1, order='F'), rhop.reshape(3 * N, - 1, order='F'))
 
 
-def plot(data):
-    fig, ax = plt.subplots(1, 1, figsize=(6, 6))
-    ax.imshow(data.reshape(Size, - 1, order='F'), extent=(0, 3 * N, 0, 3 * N), origin='lower', animated=False,
-              cmap='cividis')
+def plotish(rhox, rhop):
+    rhox = rhox.real
+    rhop = rhop.imag
+    fig, ax = plt.subplots(1, 3, figsize=(6, 6))
+    cax1 = ax[0].imshow(rhox, extent=[0, 3 * N, 0, 3 * N], origin='lower',
+                     interpolation='none', cmap='Greys')
+    cax2 = ax[1].imshow(rhop, extent=[0, 3 * N, 0, 3 * N], origin='lower',
+                        interpolation='none', cmap='Greys')
+    cax3 = ax[2].imshow((rhop + rhox), extent=[0, 3 * N, 0, 3 * N], origin='lower',
+                        interpolation='none', cmap='Greys')
+    plt.colorbar(cax1, ax=ax[0], orientation='horizontal')
+    plt.colorbar(cax2, ax=ax[1], orientation='horizontal')
+    plt.colorbar(cax3, ax=ax[2], orientation='horizontal')
+    print(rhox.trace(), rhop.trace())
     plt.show()
 
-Path = 'EulerAbove1000_20_0.1.npy'
-alpha(parser(Path)[-600])
+
+def alpha2(rho):
+    k = 1
+    def maximum(p, s, k, d) -> complex:
+        """Returning the null-state
+        a^\dagger|a> = 0 * |null> if a is the boundary."""
+        if p == N or k == N:
+            return 0
+        else:
+            return rho[p, s][k, d]
+
+    def minimum(p, s, k, d) -> complex:
+        """Returning the null-state a|0> = 0 * |null>."""
+        if p == -1 or k == -1:
+            return 0
+        else:
+            return rho[p, s][k, d]
+
+    rhox = np.full((N, 3, N, 3), 0, dtype=complex)
+    rhop = np.full((N, 3, N, 3), 0, dtype=complex)
+    rhoa = np.full((N, 3, N, 3), 0, dtype=complex)
+    for j in range(N):
+        for m in range(3):
+            for l in range(N):
+                for n in range(3):
+                    valx = (
+                        minimum(j - 1, m, l, n) * np.sqrt(j)
+                        + maximum(j + 1, m , l, n) * np.sqrt(j + 1)
+                    )
+                    valp = (
+                        maximum(j + 1, m, l, n) * np.sqrt(j + 1)
+                        - minimum(j - 1, m, l, n) * np.sqrt(j)
+                    )
+                    val = (
+                        j * rho[j, m][l, n]
+                    )
+
+                    rhox[j, m][l, n] = valx
+                    rhop[j, m][l, n] = valp
+                    rhoa[j, m][l, n] = val
+
+    return plotish2(rhoa.reshape(3 * N, - 1, order='F'))
+
+
+def plotish2(rho):
+    fig, ax = plt.subplots(1, 1, figsize=(6, 6))
+    cax1 = ax.imshow(rho.real + rho.imag, extent=[0, 3 * N, 0, 3 * N], origin='lower',
+                        interpolation='none', cmap='Greys')
+    plt.colorbar(cax1, ax=ax, orientation='horizontal')
+    plt.show()
+
+
+
+Path = 'RungeAbove10000_5_0.01.npy'
+# for i in range(len(parser(Path))):
+alpha2(parser(Path)[4000])
+

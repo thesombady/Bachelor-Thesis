@@ -4,8 +4,8 @@ import sys
 import os
 np.set_printoptions(precision=5, suppress=True, threshold=81)
 
-itera = 1000
-N = 5  # Number of particles.
+itera = 10000
+N = 6  # Number of particles.
 
 
 def parser():
@@ -46,10 +46,9 @@ Method = {
     'Euler': lambda rho, n: euler2(rho, n),
     'Runge': lambda rho, n: runge2(rho, n),
 }
-gamma_h = 1
-gamma_c = 1
-hbar = 1  # 1.0545718 * 10 ** (-34)#m^2kg/s
-
+gamma_h = 1  # usually in units of 10^(-12) seconds
+gamma_c = 1  # usually in units of 10^(-12) seconds
+hbar = 6.58 * 10 ** (-6)  # In units of eV/ns and the conversion of gamma_h  # 1.0545718 * 10 ** (-34)#m^2kg/s
 
 K_bT_c = 20 * hbar * gamma_h
 K_bT_h = 100 * hbar * gamma_h
@@ -272,8 +271,10 @@ def runge2(rho, n):
         k4 = helper(rhos[-1] + deltas * k3)
         rho1 = rhos[-1] + (k1 + 2 * k2 + 2 * k3 + k4) * deltas / 6
         rhos.append(rho1)
-        print(f'Iteration:{i}', rhos[-1].reshape(3 * N, - 1, order='F').trace())
-        print(f'Iteration:{i}', np.amax(rhos[-1]).real, np.amax(rho[-1]).imag, i)
+        tester = rhos[-1].reshape(3 * N, - 1, order='F')
+        print(f'Trace Iteration:{i}', round(tester.trace(), 5),
+                '\nImag', round(np.amin(tester.imag), 5), round(np.amax(tester.imag), 5),
+              'Real', round(np.amin(tester.real), 5), round(np.amax(tester.real), 5))
     path = os.path.join(os.getcwd(), f'Runge{NAME}{str(itera)}_{N}_{deltas}.npy')
     with open(path, 'wb') as file:
         np.save(file, np.array(rhos))

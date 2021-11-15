@@ -3,14 +3,14 @@ import os
 import matplotlib.pyplot as plt
 
 PATH = os.getcwd()
-Name = 'EulerAbove2000_3_0.02_2.npy'
-deltas = 0.002
+Name = 'RungeAbove10000_5_0.01.npy'
+deltas = 0.01
 path1 = os.path.join(PATH, Name)
-N = 3
+N = 5
 Shape = 3 * N
 gamma_h = 1
 gamma_c = 1
-hbar = 1
+hbar = 6.58 * 10 ** (-6)
 g = 1
 w_0 = 0
 w_1 = 30 * gamma_h
