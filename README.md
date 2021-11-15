@@ -1,6 +1,10 @@
 # My Github
 ![Your Repository’s Stats](https://github-readme-stats.vercel.app/api?username=thesombady&show_icons=true)
 
+![Your Repository's Stats](https://github-readme-stats.vercel.app/api/top-langs/?thesombady=Tanu-N-Prabhu&theme=blue-green)
+
+<img src="https://komarev.com/ghpvc/?thesombady=Tanu-N-Prabhu"/>
+
 Above you can see a summary of my activity on Github.
 ## My journey
 I have been working on loads of small projects corresponding to course-work and self-interest in python, which can be viewed in my public repositories.
