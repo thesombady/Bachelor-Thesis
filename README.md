@@ -1,7 +1,7 @@
 # My Github
 ![Your Repository’s Stats](https://github-readme-stats.vercel.app/api?username=thesombady&show_icons=true)
 
-![Your Repository's Stats](https://github-readme-stats.vercel.app/api/top-langs/?thesombady=thesombady&theme=blue-green)
+![Your Repository's Stats](https://github-readme-stats.vercel.app/api/top-langs/?username=thesombady&theme=blue-green)
 
 
 Above you can see a summary of my activity on Github.
