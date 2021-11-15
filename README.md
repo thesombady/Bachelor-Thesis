@@ -3,7 +3,6 @@
 
 ![Your Repository's Stats](https://github-readme-stats.vercel.app/api/top-langs/?thesombady=thesombady&theme=blue-green)
 
-<img src=https://komarev.com/ghpvc/?username = thesombady/>
 
 Above you can see a summary of my activity on Github.
 ## My journey
