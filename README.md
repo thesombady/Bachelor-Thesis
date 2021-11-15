@@ -1,9 +1,9 @@
 # My Github
 ![Your Repository’s Stats](https://github-readme-stats.vercel.app/api?username=thesombady&show_icons=true)
 
-![Your Repository's Stats](https://github-readme-stats.vercel.app/api/top-langs/?thesombady=Tanu-N-Prabhu&theme=blue-green)
+![Your Repository's Stats](https://github-readme-stats.vercel.app/api/top-langs/?thesombady=Your_GitHub_Username&theme=blue-green)
 
-<img src="https://komarev.com/ghpvc/?thesombady=Tanu-N-Prabhu"/>
+<img src=https://komarev.com/ghpvc/?username = thesombady/>
 
 Above you can see a summary of my activity on Github.
 ## My journey
