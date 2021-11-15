@@ -4,8 +4,8 @@ import sys
 import os
 np.set_printoptions(precision=5, suppress=True, threshold=81)
 
-itera = 10000
-N = 6  # Number of particles.
+itera = 1000
+N = 1000  # Number of particles.
 
 
 def parser():
