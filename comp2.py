@@ -4,15 +4,15 @@ import sys
 import os
 np.set_printoptions(precision=5, suppress=True, threshold=81)
 
-itera = 1000
-N = 1000  # Number of particles.
+itera = 5000
+N = 3  # Number of particles.
 
 
 def parser():
     opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]
     argv = [arg for arg in sys.argv[1:] if not arg.startswith("-")]
 
-    assert len(argv) <= 4, 'To many arguments'
+    assert len(argv) <= 5, 'To many arguments'
 
     def name(argument):
         if 'Above' in argument:
@@ -22,21 +22,31 @@ def parser():
         elif 'Lasing' in argument:
             return 37.5, 'Lasing'
 
+    def compressor(argument):
+        if argument == 'True':
+            return True
+        else:
+            return False
+
     if "-h" in opts:
         print("""Arg1 = Method to use, Euler & Runge,Arg2 = Delta t(0.001),
-        Arg3 = Mode of operation(Above, Below, Lasing)""")
+        Arg3 = Mode of operation(Above, Below, Lasing), Arg4 = Compressed {True or False}""")
         sys.exit()
     try:
         KEY = str(argv[0])
         deltas = float(argv[1])
         w_2 = name(argv[2])[0]
         NAME = name(argv[2])[1]
-        return KEY, deltas, NAME, w_2
+        try:
+            KEY2 = compressor(argv[3])
+        except:
+            KEY2 = False
+        return KEY, deltas, NAME, w_2, KEY2
     except Exception as e:
         raise e
 
 
-KEY, deltas, NAME, w_2 = parser()
+KEY, deltas, NAME, w_2, KEY2 = parser()
 # NAME = 'Below1000_50_1'
 # KEY = 'Runge'
 
@@ -46,6 +56,7 @@ Method = {
     'Euler': lambda rho, n: euler2(rho, n),
     'Runge': lambda rho, n: runge2(rho, n),
 }
+
 gamma_h = 1  # usually in units of 10^(-12) seconds
 gamma_c = 1  # usually in units of 10^(-12) seconds
 hbar = 6.58 * 10 ** (-6)  # In units of eV/ns and the conversion of gamma_h  # 1.0545718 * 10 ** (-34)#m^2kg/s
@@ -71,6 +82,7 @@ n_c = population(w_2 - w_1, K_bT_c)
 
 
 def delta(n_1, n_2) -> int:
+    """A delta function between to integers, returns one if equal, otherwise returns zero."""
     if n_1 == n_2:
         return 1
     else:
@@ -101,22 +113,6 @@ def rhodot(alpha, beta, rho) -> complex:
         else:
             return rho[p, s][k, d]
 
-    """
-    var = (1/1j * (w_0 * (delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])  # first
-            + w_1 * (delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1])  # second
-            + w_2 * (delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])  # third
-            + w_f * rho[j, m][l, n] * (j - l))  # coupling
-            - 2 * g * (np.sqrt(j) * delta(m, 0) * minimum(j - 1, 1, l, n)  # might be plus
-            + np.sqrt(j + 1) * delta(m, 1) * maximum(j + 1, 0, l, n)).imag  # Jaynes - Cumming
-            + gamma_h * (n_h + 1) * (2 * delta(n, 0) * delta(m, 0) * rho[j, 2][l, 2]
-            - delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])
-            + gamma_h * n_h * (2 * delta(m, 2) * delta(n, 2) * rho[j, 0][l, 0]
-            - delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])  # Hot - Liouvillian
-            + gamma_c * (n_c + 1) * (2 * delta(m, 1) * delta(n, 1) * rho[j, 2][l, 2]
-            - delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])
-            + gamma_c * n_c * (2 * delta(m, 2) * delta(n, 2) * rho[j, 1][l, 1]
-            - delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1]))  # Cold - Liouvillian
-    """
 
     var = (
         - 1j * (w_0 * (delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])
@@ -144,38 +140,11 @@ def rhodot(alpha, beta, rho) -> complex:
         - delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1]
         )
     )
-
-    """
-    var = (
-            - 1j * (w_0 * (delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])
-                    + w_1 * (delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1])
-                    + w_2 * (delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2])
-                    + w_f * rho[j, m][l, n] * (j - l))
-                    - 2 * g * (np.sqrt(j) * delta(m, 0) * minimum(j - 1, 1, l, n)
-                           + np.sqrt(j + 1) * delta(m, 1) * maximum(j + 1, 0, l, n)).imag
-            + gamma_h * (n_h + 1) * (
-                    2 * delta(n, 0) * delta(m, 0) * rho[j, 2][l, 2]
-                    - delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2]
-            )
-            + gamma_h * n_h * (
-                    2 * delta(m, 2) * delta(n, 2) * rho[j, 0][l, 0]
-                    - delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0]
-            )
-            + gamma_c * (n_c + 1) * (
-                    2 * delta(m, 1) * delta(n, 1) * rho[j, 2][l, 2]
-                    - delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2]
-            )
-            + gamma_c * n_c * (
-                    2 * delta(m, 2) * delta(n, 2) * rho[j, 1][l, 1]
-                    - delta(m, 1) * rho[j, 1][l, n] - delta(n, 1) * rho[j, m][l, 1]
-            )
-    )
-    """
     return var
 
 
 def initialrho(n: int) -> np.array:
-    """Returns a initial-condition density matrix, a photon in the ground-state of the atom"""
+    """Returns a initial-condition density matrix, no photon in the ground-state of the atom"""
     ten = np.full((n, 3, n, 3), 0, dtype=complex)
     for j in range(n):
         for m in range(3):
@@ -211,21 +180,6 @@ def helper(rho) -> np.array:
 Iterations = []
 
 
-def euler(rho, n):
-    if n > 0:
-        k1 = helper(rho)  # computes rhodot
-        rho1 = rho + k1 * deltas
-        print(f'Iteration:{n}', rho1.reshape(3 * N, - 1, order='F').trace())
-        Iterations.append(rho1)
-        tester = rho1.reshape(3 * N, - 1, order='F')
-        assert np.matmul(tester, tester).all() == tester.all(), 'Failed computation'
-        euler(rho1, n - 1)
-    else:
-        path = os.path.join(os.getcwd(), f'Euler{NAME}{str(itera)}_{N}_{deltas}.npy')
-        with open(path, 'wb') as file:
-            np.save(file, np.array(Iterations))
-
-
 def euler2(rho, n):
     rhos = []
     rhos.append(rho)
@@ -233,32 +187,15 @@ def euler2(rho, n):
         rho1 = rhos[-1] + helper(rhos[-1]) * deltas
         rhos.append(rho1)
         tester = rhos[-1].reshape(3 * N, - 1, order='F')
-        print(f'Trace Iteration:{i}', tester.trace())
-        print(f'Iteration:{i}', 'Imag', np.amin(tester.imag), np.amax(tester.imag),
-              'Real', np.amin(tester.real), np.amax(tester.real))
-        # print(np.linalg.det(tester))
-        #  progressbar(i)
-    path = os.path.join(os.getcwd(), f'Euler{NAME}{str(itera)}_{N}_{deltas}.npy')
+        print(f'Trace Iteration:{i}', round(tester.trace(), 5),
+              '\nImag', round(np.amin(tester.imag), 5), round(np.amax(tester.imag), 5),
+              'Real', round(np.amin(tester.real), 5), round(np.amax(tester.real), 5))
+    path = os.path.join(os.getcwd(), f'Euler{NAME}{str(itera)}_{N}_{deltas}_C{KEY2}.npy')
     with open(path, 'wb') as file:
-        np.save(file, np.array(rhos))
-
-
-def runge(rho, n):
-    if not isinstance(rho, (np.ndarray, np.generic)):
-        raise TypeError("Input is of wrong format")
-    if n > 0:
-        k1 = helper(rho)
-        k2 = helper(rho + deltas / 2 * k1)
-        k3 = helper(rho + deltas / 2 * k2)
-        k4 = helper(rho + deltas * k3)
-        rho1 = rho + (k1 + 2 * k2 + 2 * k3 + k4) * deltas / 6
-        Iterations.append(rho1)
-        print(rho.reshape(3 * N, -1, order='F').trace(), n)
-        runge(rho1, n - 1)
-    else:
-        path = os.path.join(os.getcwd(), f'Runge{NAME}{str(itera)}_{N}_{deltas}.npy')
-        with open(path, 'wb') as file:
-            np.save(file, np.array(Iterations))
+        if KEY2 == False:
+            np.save(file, np.array(rhos))
+        else:
+            np.save(file, np.array([rhos[0], rhos[-1]]))
 
 
 def runge2(rho, n):
@@ -275,29 +212,19 @@ def runge2(rho, n):
         print(f'Trace Iteration:{i}', round(tester.trace(), 5),
                 '\nImag', round(np.amin(tester.imag), 5), round(np.amax(tester.imag), 5),
               'Real', round(np.amin(tester.real), 5), round(np.amax(tester.real), 5))
-    path = os.path.join(os.getcwd(), f'Runge{NAME}{str(itera)}_{N}_{deltas}.npy')
+    path = os.path.join(os.getcwd(), f'Runge{NAME}{str(itera)}_{N}_{deltas}_C{KEY2}.npy')
     with open(path, 'wb') as file:
-        np.save(file, np.array(rhos))
-
-
-def progressbar(func, iteration, prefix='', suffix='', decimals=1, fill = '█', length = 1000, printEnd="\r"):
-    if not callable(func):
-        sys.exit()
-
-    def printprogress(iteration):
-        precent = (f"{100 * iteration/N}"+str(decimals))
-        filledlength = int(length * iteration // N)
-        bar = fill * filledlength + '-' * (length - filledlength)
-        print(f'\r{prefix}|{bar}| {precent}% {suffix}', end=printEnd)
-    printprogress(iteration)
+        if KEY2 == False:
+            np.save(file, np.array(rhos))
+        else:
+            np.save(file, np.array([rhos[0], rhos[-1]]))
 
 
 
-start = time.time()
+
 Rho0 = initialrho(n=N)
 Iterations.append(Rho0)
 try:
     Method[KEY](Rho0, itera)
 except:
     raise Exception('Error in computing the time-evolution')
-# print(Iterations[-1].reshape(3 * N, - 1))
