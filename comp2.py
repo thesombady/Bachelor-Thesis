@@ -1,11 +1,11 @@
 import numpy as np  # Used for computation.
-import time
 import sys
 import os
 np.set_printoptions(precision=5, suppress=True, threshold=81)
 
 itera = 10000
 N = 100  # Number of particles.
+Iterstep = 1000 #Saving parameter
 
 
 def parser():
@@ -56,7 +56,6 @@ Method = {
     'Euler': lambda rho, n: euler2(rho, n),
     'Runge': lambda rho, n: runge2(rho, n),
 }
-
 gamma_h = 1  # usually in units of 10^(-12) seconds
 gamma_c = 1  # usually in units of 10^(-12) seconds
 hbar = 6.58 * 10 ** (-6)  # In units of eV/ns and the conversion of gamma_h  # 1.0545718 * 10 ** (-34)#m^2kg/s
@@ -112,7 +111,6 @@ def rhodot(alpha, beta, rho) -> complex:
             return 0
         else:
             return rho[p, s][k, d]
-
 
     var = (
         - 1j * (w_0 * (delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0])
@@ -177,54 +175,117 @@ def helper(rho) -> np.array:
     return rho1
 
 
-Iterations = []
+def helper2(rho) -> np.array:
+    """Helper function, which computes rho-dot, for a given density operator rho. Is used in Runge function,
+    to iterate either with euler,
+    Runge-Kutta method, in order to solve a first order differential equation at time t."""
+    rho1 = zerorho(n=N)
+    for index, val in np.ndenumerate(rho1):
+        j = index[0]
+        m = index[1]
+        l = index[2]
+        n = index[3]
+        var = rhodot([j, m], [l, n], rho)
+        rho1[j, m][l, n] = var
+    """
+    for j in range(N):
+        for m in range(3):
+            for l in range(N):
+                for n in range(3):
+                    var = rhodot([j, m], [l, n], rho)
+                    rho1[j, m][l, n] = var
+    """
+    tester = rho1.reshape(3 * N, -1, order='F')
+    assert np.matmul(tester, tester).all() == tester.all(), 'Failed computation'
+    return rho1
 
 
 def euler2(rho, n):
     rhos = []
     rhos.append(rho)
-    for i in range(n):
-        rho1 = rhos[-1] + helper(rhos[-1]) * deltas
-        rhos.append(rho1)
-        tester = rhos[-1].reshape(3 * N, - 1, order='F')
-        print(f'Trace Iteration:{i}', round(tester.trace(), 5),
-              '\nImag', round(np.amin(tester.imag), 5), round(np.amax(tester.imag), 5),
-              'Real', round(np.amin(tester.real), 5), round(np.amax(tester.real), 5))
-    path = os.path.join(os.getcwd(), f'Euler{NAME}{str(itera)}_{N}_{deltas}_C{KEY2}.npy')
-    with open(path, 'wb') as file:
-        if KEY2 == False:
+    if KEY2 is False:
+        for i in range(n):
+            rho1 = rhos[-1] + helper2(rhos[-1]) * deltas
+            rhos.append(rho1)
+            tester = rho1.reshape(3 * N, - 1, order='F')
+            print(f'Trace Iteration:{i}', round(tester.trace(), 5),
+                  '\nImag', round(np.amin(tester.imag), 5), round(np.amax(tester.imag), 5),
+                  'Real', round(np.amin(tester.real), 5), round(np.amax(tester.real), 5),
+                  f'\nLen of rho: {len(rhos)}')
+            if i % Iterstep == 0 and i > 2:
+                step = i/Iterstep
+                path = os.path.join(os.getcwd(), f'Euler{NAME}{str(itera)}_{N}_{deltas}_C{KEY2}_iter{int(step)}.npy')
+                with open(path, 'wb') as file:
+                    np.save(file, np.array(rhos[1:]))
+                del rhos[0: - 1]
+            if i == n - 1:
+                step = int(n/Iterstep)
+                path = os.path.join(os.getcwd(), f'Euler{NAME}{str(itera)}_{N}_{deltas}_C{KEY2}_iter{int(step)}.npy')
+                with open(path, 'wb') as file:
+                    np.save(file, np.array(rhos))
+    else:
+        for i in range(n):
+            if i > 3:
+                del rhos[-2]
+            rho1 = rhos[-1] + helper(rhos[-1]) * deltas
+            rhos.append(rho1)
+            tester = rho1.reshape(3 * N, - 1, order='F')
+            print(f'Trace Iteration:{i}', round(tester.trace(), 5),
+                  '\nImag', round(np.amin(tester.imag), 5), round(np.amax(tester.imag), 5),
+                  'Real', round(np.amin(tester.real), 5), round(np.amax(tester.real), 5))
+        path = os.path.join(os.getcwd(), f'Euler{NAME}{str(itera)}_{N}_{deltas}_C{KEY2}.npy')
+        with open(path, 'wb') as file:
             np.save(file, np.array(rhos))
-        else:
-            np.save(file, np.array([rhos[0], rhos[-1]]))
 
 
 def runge2(rho, n):
     rhos = []
     rhos.append(rho)
-    for i in range(n):
-        k1 = helper(rhos[-1])
-        k2 = helper(rhos[-1] + deltas / 2 * k1)
-        k3 = helper(rhos[-1] + deltas / 2 * k2)
-        k4 = helper(rhos[-1] + deltas * k3)
-        rho1 = rhos[-1] + (k1 + 2 * k2 + 2 * k3 + k4) * deltas / 6
-        rhos.append(rho1)
-        tester = rhos[-1].reshape(3 * N, - 1, order='F')
-        print(f'Trace Iteration:{i}', round(tester.trace(), 5),
+    if KEY2 is False:
+        for i in range(n):
+            k1 = helper(rhos[-1])
+            k2 = helper(rhos[-1] + deltas / 2 * k1)
+            k3 = helper(rhos[-1] + deltas / 2 * k2)
+            k4 = helper(rhos[-1] + deltas * k3)
+            rho1 = rhos[-1] + (k1 + 2 * k2 + 2 * k3 + k4) * deltas / 6
+            rhos.append(rho1)
+            tester = rho1.reshape(3 * N, - 1, order='F')
+            print(f'Trace Iteration:{i}', round(tester.trace(), 5),
+                  '\nImag', round(np.amin(tester.imag), 5), round(np.amax(tester.imag), 5),
+                  'Real', round(np.amin(tester.real), 5), round(np.amax(tester.real), 5),
+                  f'\nLen of rho: {len(rhos)}')
+            if i % Iterstep == 0 and i > 2:
+                step = i/Iterstep
+                path = os.path.join(os.getcwd(), f'Runge{NAME}{str(itera)}_{N}_{deltas}_C{KEY2}_iter{int(step)}.npy')
+                with open(path, 'wb') as file:
+                    np.save(file, np.array(rhos[1:]))
+                del rhos[0: - 1]
+            if i == n - 1:
+                step = int(n / Iterstep)
+                path = os.path.join(os.getcwd(), f'Runge{NAME}{str(itera)}_{N}_{deltas}_C{KEY2}_iter{int(step)}.npy')
+                with open(path, 'wb') as file:
+                    np.save(file, np.array(rhos))
+    else:
+        for i in range(n):
+            if i > 3:
+                del rhos[-2]
+            k1 = helper(rhos[-1])
+            k2 = helper(rhos[-1] + deltas / 2 * k1)
+            k3 = helper(rhos[-1] + deltas / 2 * k2)
+            k4 = helper(rhos[-1] + deltas * k3)
+            rho1 = rhos[-1] + (k1 + 2 * k2 + 2 * k3 + k4) * deltas / 6
+            rhos.append(rho1)
+            tester = rho1.reshape(3 * N, - 1, order='F')
+            print(f'Trace Iteration:{i}', round(tester.trace(), 5),
                 '\nImag', round(np.amin(tester.imag), 5), round(np.amax(tester.imag), 5),
-              'Real', round(np.amin(tester.real), 5), round(np.amax(tester.real), 5))
-    path = os.path.join(os.getcwd(), f'Runge{NAME}{str(itera)}_{N}_{deltas}_C{KEY2}.npy')
-    with open(path, 'wb') as file:
-        if KEY2 == False:
+                'Real', round(np.amin(tester.real), 5), round(np.amax(tester.real), 5))
+        path = os.path.join(os.getcwd(), f'Runge{NAME}{str(itera)}_{N}_{deltas}_C{KEY2}.npy')
+        with open(path, 'wb') as file:
             np.save(file, np.array(rhos))
-        else:
-            np.save(file, np.array([rhos[0], rhos[-1]]))
-
-
 
 
 Rho0 = initialrho(n=N)
-Iterations.append(Rho0)
 try:
     Method[KEY](Rho0, itera)
-except:
-    raise Exception('Error in computing the time-evolution')
+except Exception as E:
+    raise E('Error in computing the time-evolution')
