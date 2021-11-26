@@ -3,10 +3,11 @@ import os
 import matplotlib.pyplot as plt
 
 PATH = os.getcwd()
-Name = 'RungeAbove10000_5_0.01.npy'
+os.chdir('uniruns')
+Name = 'EulerAbove10000_4_0.001_CFalse_iter.npy'
 deltas = 0.01
-path1 = os.path.join(PATH, Name)
-N = 5
+# path1 = os.path.join(PATH, Name)
+N = 4
 Shape = 3 * N
 gamma_h = 1
 gamma_c = 1
@@ -147,9 +148,30 @@ def name2(path):
     return 'nothing'
 
 
-data = parser(path1)
-value = []
-xlist = [i * deltas for i in range((len(data)))]
+data = []
+iterations = 0
+for i in range(1, 11):
+    path = f'RungeAbove10000_4_0.001_CFalse_iter{i}.npy'
+    rho = parser(path)
+    data.append(rho)
+    iterations += len(rho)
+
+# data = np.array(data, dtype=object)
+rawdata = np.array([data[i][j] for i in range(len(data)) for j in range(len(data[i]))])
+for i in range(len(rawdata)):
+    for j in range(len(rawdata)):
+        if rawdata[i] == rawdata[j] and i != j:
+            print('Duplicate')
+
+
+"""
+energyval = []
+for i in range(len(rawdata)):
+    energyval.append(energy(rawdata, i))
+with open('testEnergy2.npy', 'wb') as file:
+    np.save(file, np.array(energyval))
+"""
+"""
 for i in range(len(data)):
     vals = energy2(data, i)
     print(vals, i)
@@ -157,3 +179,4 @@ for i in range(len(data)):
 
 with open(name3(path1), 'wb') as file:
     np.save(file, np.array(value))
+"""

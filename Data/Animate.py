@@ -7,7 +7,7 @@ from matplotlib.animation import FuncAnimation
 
 # os.chdir('..')
 PATH = os.getcwd()
-Name = 'RungeAbove10000_5_0.01.npy'
+Name = 'RungeAbove1000_5_0.01.npy'
 N = 5
 Shape = 3 * N
 delta = 0.01
@@ -28,9 +28,19 @@ def plot(data):
 
 fig, ax = plt.subplots(2, 1, figsize=(20, 20))
 FPS = 50
+os.chdir('..')
 
 path2 = os.path.join(PATH, Name)
-data1 = parser(path2)
+datalist = []
+for i in range(1, 11):
+    path = f'RungeAbove1000_5_0.01_CFalse_iter{i}.npy'
+    datalist.append(parser(path))
+
+data1 = np.array([datalist[i][j] for i in range(len(datalist)) for j in range(len(datalist[i]))])
+
+
+#data1 = parser(path2)
+
 val = data1[-1].reshape(Shape, - 1, order='F')
 cax1 = ax[0].imshow(val.real, extent=[0, Shape, 0, Shape], interpolation='none',
                 origin='lower', animated=False, vmin=0, vmax=1, cmap='Greys')
@@ -43,7 +53,7 @@ c2 = plt.colorbar(cax2, ax=ax[1], orientation='horizontal', fraction=0.04)
 
 
 def animate(n):
-    n = int(n * 3)
+    n = n
     dataset = data1[n].reshape(Shape, - 1, order='F')
     fig.suptitle(f'Time {n * delta}')
     im1 = cax1.set_array(dataset.real)
@@ -59,7 +69,7 @@ def name(path):
     return name1
 
 
-ani = FuncAnimation(fig, animate, interval=1, frames=int(len(data1)/4))
+ani = FuncAnimation(fig, animate, interval=1, frames=int(len(data1)))
 try:
     ani.save(name(path2), fps=FPS, writer='pillow', extra_args=['-vcodec', 'libx264'])
 except Exception as E:

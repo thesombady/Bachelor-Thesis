@@ -3,9 +3,9 @@ import sys
 import os
 np.set_printoptions(precision=5, suppress=True, threshold=81)
 
-itera = 10000
-N = 100  # Number of particles.
-Iterstep = 1000 #Saving parameter
+itera = 1000
+N = 5  # Number of particles.
+Iterstep = 100 #Saving parameter
 
 
 def parser():
