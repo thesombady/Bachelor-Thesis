@@ -28,7 +28,7 @@ def ocu(data):
     return oc.reshape(3 * N, - 1, order='F').trace().real
 
 
-os.chdir('uniruns')
+os.chdir('Coherent2')
 rawdata = []
 for i in range(1, 11):
     path = f'RungeAbove10000_100_0.01_CFalse_iter{i}.npy'
@@ -44,14 +44,7 @@ for i in range(len(data)):
 for i in range(len(occupation)):
     print(occupation[i])
 
-with open('AboveOccupation.npy', 'wb') as file:
+with open('CoherentAbove.npy', 'wb') as file:
     np.save(file, np.array(occupation))
-"""
 
-path = 'RungeBelow10000_100_0.01_CFalse_iter10.npy'
-data = parser(path)
-osci = []
-for i in range(len(data)):
-    val = ocu(data[i])
-    osci.append(val)
-"""
+print(occupation[-1])

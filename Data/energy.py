@@ -58,8 +58,8 @@ def energy(data1) -> complex:  # , n) -> complex:
     for j in range(N):
         for m in range(3):
             for l in range(N):
-                for n in range(3):
-                    val = hbar * (
+                for n in range(3):  # Note, 1 is replaced with hbar
+                    val = 1 * (
                         w_0 * dataset[j, m][l, 0]
                         + w_1 * dataset[j, m][l, 1]
                         + w_2 * dataset[j, m][l, 2]
@@ -69,42 +69,88 @@ def energy(data1) -> complex:  # , n) -> complex:
                             + delta(n, 0) * minimum(j, m, l - 1, 1) * np.sqrt(l)
                         )
                     )
-                    rho0[j, m][l, n] = val
-    return rho0.reshape(3 * N, - 1).trace()
+                    rho0[j, m][l, n] += val
+    return rho0.reshape(3 * N, - 1, order='F').trace()
 
 
-def findfiles():
-    files = []
-    deltas = []
-    for filename in os.listdir(os.chdir('..')):
-        if filename.endswith('.npy'):
-            if not 'Energy' in filename:
-                files.append(filename)
-                if '0.01' in filename:
-                    deltas.append(0.01)
-                elif '0.02' in filename:
-                    deltas.append(0.02)
-                elif '0.001' in filename:
-                    deltas.append(0.001)
-                elif '0.005' in filename:
-                    deltas.append(0.005)
-                else:
-                    raise KeyError(
-                        'Could not match delta'
-                    )
-        else:
-            pass
-    assert len(files) == len(deltas), 'missmatch'
-    return files, deltas
+os.chdir('..')
+Runge0_01 = []
+for i in range(1, 3):
+    path = f'RungeAbove1000_5_0.01_CFalse_iter{i}.npy'
+    Runge0_01.append(parser(path))
 
+Runge0_01 = np.array([Runge0_01[i][j] for i in range(len(Runge0_01))
+                 for j in range(len(Runge0_01[i]))])
 
-a, b = findfiles()
+Runge0_02 = []
+for i in range(1, 3):
+    path = f'RungeAbove500_5_0.02_CFalse_iter{i}.npy'
+    Runge0_02.append(parser(path))
 
-for data, deltas in zip(a, b):
-    rho = parser(data)
-    path = name3(data)
+Runge0_02 = np.array([Runge0_02[i][j] for i in range(len(Runge0_02))
+                 for j in range(len(Runge0_02[i]))])
+
+Runge0_001 = []
+for i in range(1, 11):
+    path = f'RungeAbove10000_5_0.001_CFalse_iter{i}.npy'
+    Runge0_001.append(parser(path))
+
+Runge0_001 = np.array([Runge0_001[i][j] for i in range(len(Runge0_001))
+                 for j in range(len(Runge0_001[i]))])
+
+Runge0_005 = []
+for i in range(1, 3):
+    path = f'RungeAbove2000_5_0.005_CFalse_iter{i}.npy'
+    Runge0_005.append(parser(path))
+
+Runge0_005 = np.array([Runge0_005[i][j] for i in range(len(Runge0_005))
+                 for j in range(len(Runge0_005[i]))])
+
+Euler0_01 = []
+for i in range(1, 3):
+    path = f'EulerAbove1000_5_0.01_CFalse_iter{i}.npy'
+    Euler0_01.append(parser(path))
+
+Euler0_01 = np.array([Euler0_01[i][j] for i in range(len(Euler0_01))
+                 for j in range(len(Euler0_01[i]))])
+
+Euler0_02 = []
+for i in range(1, 3):
+    path = f'EulerAbove500_5_0.02_CFalse_iter{i}.npy'
+    Euler0_02.append(parser(path))
+
+Euler0_02 = np.array([Euler0_02[i][j] for i in range(len(Euler0_02))
+                 for j in range(len(Euler0_02[i]))])
+
+Euler0_001 = []
+for i in range(1, 11):
+    path = f'EulerAbove10000_5_0.001_CFalse_iter{i}.npy'
+    Euler0_001.append(parser(path))
+
+Euler0_001 = np.array([Euler0_001[i][j] for i in range(len(Euler0_001))
+                 for j in range(len(Euler0_001[i]))])
+
+Euler0_005 = []
+for i in range(1, 3):
+    path = f'EulerAbove2000_5_0.005_CFalse_iter{i}.npy'
+    Euler0_005.append(parser(path))
+
+Euler0_005 = np.array([Euler0_005[i][j] for i in range(len(Euler0_005))
+                 for j in range(len(Euler0_005[i]))])
+
+Runges = [Runge0_01, Runge0_02, Runge0_001, Runge0_005]
+Eulers = [Euler0_01, Euler0_02, Euler0_001, Euler0_005]
+RungeNames = ['Runge0.01Energy.npy', 'Runge0.02Energy.npy', 'Runge0.001Energy.npy', 'Runge0.005Energy.npy']
+EulerNames = ['Euler0.01Energy.npy', 'Euler0.02Energy.npy', 'Euler0.001Energy.npy', 'Euler0.005Energy.npy']
+for data, name in zip(Runges, RungeNames):
     array = []
-    for i in range(len(rho)):
-        array.append(energy(rho[i]))
-    with open(path, 'wb') as file:
+    for i in range(len(data)):
+        array.append(energy(data[i]))
+    with open(name, 'wb') as file:
+        np.save(file, np.array(array))
+for data, name in zip(Eulers, EulerNames):
+    array = []
+    for i in range(len(data)):
+        array.append(energy(data[i]))
+    with open(name, 'wb') as file:
         np.save(file, np.array(array))

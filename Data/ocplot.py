@@ -3,7 +3,13 @@ import matplotlib.pyplot as plt
 import os
 
 N = 100
-os.chdir('uniruns')
+os.chdir('Coherent')
+delta = 0.01
+
+plt.rc('xtick', labelsize=15)
+plt.rc('ytick', labelsize=15)
+font = {'family': 'normal',
+        'size': 13}
 
 
 def parser(path):
@@ -19,35 +25,69 @@ def occupation(data):
         for m in range(3):
             for l in range(N):
                 for n in range(3):
-                    if m == 1 and n == 1:
-                        modes[j] += data[j, m][l, n].real
-                    # modes[j] += data[j, m][l, n]
-    plotish(modes)
+                    modes[j] += data[j, m][l, n].real
+    return modes
 
 
-def plotish(data1):
-    alpha = 11.68
+def name(path):
+    if 'Above' in path:
+        return 'Occupation distribution above masing threshold'
+    elif 'Lasing' in path:
+        return 'Occupation distribution at masing threshold'
+    elif 'Below' in path:
+        return 'Occupation distribution below masing threshold'
+
+
+def name2(path):
+    if 'Above' in path:
+        return 'ModeOccupationAbove.pdf'
+    elif 'Lasing' in path:
+        return 'ModeOccupationLasing.pdf'
+    elif 'Below' in path:
+        return 'ModeOccupationBelow.pdf'
+    else:
+        raise TypeError("Don't work")
+
+
+def plotish(path):
+    fig, ax = plt.subplots(1, 1, figsize=(7.5, 5))
     modes = np.array([i for i in range(N)], dtype=int)
-    plt.bar(modes, data1, width=1, label='Simulated values')
-    plt.xlabel(r'Photon mode $n$')
-    plt.ylabel(r'Probability')
-    plt.title('Occupation of the photon modes')
-    plt.legend()
+    data = parser(path)[-1]
+    oc = occupation(data)
+    ax.bar(modes, oc, width=1)
+    ax.set_xlabel(r'Photon mode $n$', size=15, labelpad=0)
+    ax.set_ylabel(r'Probability', size=15, labelpad=2)
+    ax.set_title(name(path), size=17)
+    plt.annotate(text='(a)', xy=[3, 0.95 * float(np.amax(oc))], size=16)
     plt.grid()
-    plt.show()
+    plt.savefig(name2(path))
+    # plt.show()
 
 
-# os.chdir('/Users/andreasevensen/Documents/GitHub/Bachelor-Thesis/Data/uniruns/')
-""" # Probability distribution above the masing threshold.
-rawdata = []
-for i in range(1, 11):
-    path = f'RungeAbove10000_100_0.01_CFalse_iter{i}.npy'
-    rawdata.append(parser(path))
+def ocu(data):
+    oc = np.full((N, 3, N, 3), 0, dtype=complex)
+    for index, val in np.ndenumerate(data):
+        j = index[0]
+        m = index[1]
+        l = index[2]
+        n = index[3]
+        oc[j, m][l, n] = val * j
+    """
+    for j in range(N):
+        for m in range(3):
+            for l in range(N):
+                for n in range(3):
+                    val = j * data[j, m][l, n]
+                    oc[j, m][l, n] = val
+    """
+    return oc.reshape(3 * N, - 1, order='F').trace().real
 
-data = np.array([rawdata[i][-1] for i in range(len(rawdata))])[-1]
-occupation(data)
-"""
-path = 'RungeLasing10000_100_0.01_CFalse_iter10.npy'
-data = parser(path)[-1]
-occupation(data)
+
+
+Path = 'RungeAbove10000_100_0.01_CFalse_iter10.npy'
+
+plotish(Path)
+# print(ocu(parser(Path)[-1]))
+
+
 
