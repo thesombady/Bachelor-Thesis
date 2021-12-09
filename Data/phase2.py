@@ -1,11 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-os.chdir('Coherent')
+# os.chdir('uniruns')
+os.chdir('..')
+os.chdir('coherenttest')
 
-N = 100
+N = 5  # 100
 R = 50
-Path = 'RungeAbove10000_100_0.01_CFalse_iter1.npy'
+# Path = 'RungeAbove10000_100_0.01_CFalse_iter1.npy'
+Path = 'RungeAbove1000_5_0.01_CFalse_iter2.npy'
 
 
 def parser(path):
@@ -35,23 +38,53 @@ def name2(path):
         raise TypeError('Can not save')
 
 
-data = parser(Path)[600]
-
-
 def coherent(a):
     val = []
-    for l in range(0, N):
+    for j in range(N):
         for m in range(3):
             # val += np.exp(-abs(a) ** 2 / 2) * a ** l / (np.sqrt(np.math.factorial(l)))
-            val.append(np.exp(-abs(a) ** 2 / 2) * a ** l / np.sqrt(float(np.math.factorial(l))) * data[l, m][l, m])
+            val.append(np.exp(-abs(a) ** 2 / 2) * a ** j / np.sqrt(float(np.math.factorial(j))) * data[j, m][j, m])
     return sum(val).real/np.pi
 
 
-a = 5
-xvec = np.linspace(-a, a, R)
-X, Y = np.meshgrid(xvec, xvec)
+def coherent2(a):
+    al = 1.25
+    val = []
+    for j in range(N):
+        for m in range(3):
+            var = np.exp(-abs(a) ** 2 / 2 - abs(al) ** 2 / 2) * a ** j / np.sqrt(float(np.math.factorial(j))) * data[j, m][j, m]
 
+
+a = 5
+xvec = np.linspace(-a, a, R, dtype=complex)
 veccoherent = np.vectorize(coherent)
+X, Y = np.meshgrid(xvec, xvec)
+PATHS = ['RungeAbove10000_100_0.01_CFalse_iter10.npy', 'RungeLasing10000_100_0.01_CFalse_iter10.npy',
+         'RungeBelow10000_100_0.01_CFalse_iter10.npy']
+lists = ['(c)', '(b)', '(a)']
+"""
+for path, const in zip(PATHS, lists):
+    global data
+    data = parser(path)[-1]
+
+    zval = veccoherent(np.sqrt(X ** 2 + Y ** 2))
+    fig, ax = plt.subplots(1, 1, figsize=(6, 6))
+    plt.rc('xtick', labelsize=15)
+    plt.rc('ytick', labelsize=15)
+    font = {'family': 'normal',
+            'size': 13}
+    cax = ax.imshow(zval, cmap='jet', extent=[-a, a, -a, a],
+                 vmin=np.amin(zval), vmax=np.amax(zval))
+    ax.annotate(text=const, xy=[-5, 1.05], xycoords=ax.get_xaxis_transform(), size=17)
+    ax.set_ylabel(r'$\mathfrak{Im}(\alpha)$', size=15, labelpad=2)
+    ax.set_xlabel(r'$\mathfrak{R}(\alpha)$', size=15)
+    ax.set_title(f'Q-function when operating\n{name(path)} the masing threshold', size=17)
+    plt.yticks([-5, 0, 5], size=17)
+    plt.xticks([-5, 0, 5], size=17)
+    plt.show()
+    # plt.savefig(name2(path))
+"""
+data = parser(Path)[-1]
 zval = veccoherent(np.sqrt(X ** 2 + Y ** 2))
 fig, ax = plt.subplots(1, 1, figsize=(6, 6))
 plt.rc('xtick', labelsize=15)
@@ -60,11 +93,10 @@ font = {'family': 'normal',
         'size': 13}
 cax = ax.imshow(zval, cmap='jet', extent=[-a, a, -a, a],
              vmin=np.amin(zval), vmax=np.amax(zval))
-ax.annotate(text='(a)', xy=[-5, 1.05], xycoords=ax.get_xaxis_transform(), size=17)
+ax.annotate(text='test', xy=[-5, 1.05], xycoords=ax.get_xaxis_transform(), size=17)
 ax.set_ylabel(r'$\mathfrak{Im}(\alpha)$', size=15, labelpad=2)
 ax.set_xlabel(r'$\mathfrak{R}(\alpha)$', size=15)
 ax.set_title(f'Q-function when operating\n{name(Path)} the masing threshold', size=17)
 plt.yticks([-5, 0, 5], size=17)
 plt.xticks([-5, 0, 5], size=17)
 plt.show()
-# plt.savefig(name2(Path))

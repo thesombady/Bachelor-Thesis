@@ -4,7 +4,7 @@ import os
 np.set_printoptions(precision=5, suppress=True, threshold=81)
 
 itera = 1000  # Number of iterations
-N = 3  # Number of particles.
+N = 10  # Number of particles.
 Iterstep = 500  # Saving parameter
 os.chdir('coherenttest')
 
@@ -144,33 +144,29 @@ def rhodot(alpha, beta, rho) -> complex:
 def initialrho(n: int) -> np.array:
     """Returns a initial-condition density matrix, no photon in the ground-state of the atom"""
     ten = np.full((n, 3, n, 3), 0, dtype=complex)
+    """
     for j in range(n):
         for m in range(3):
             for l in range(n):
                 for k in range(3):
                     if m == 0 and k == 0 and j == 0 and l == 0:
                         ten[j, m][l, k] = 1
+    """
+    ten[0, 0][0, 0] += 1
     return ten/ten.sum()  # Normalizing
 
 
 def initialrho2(n: int) -> np.array:
     """Returns an initial-conditions density operator, no photon in the ground-state"""
     ten = np.full((n, 3, n, 3), 0, dtype=complex)
-    al = 2
-
-    for j in range(n):
-        for m in range(3):
-            for l in range(n):
-                for n in range(3):
-                    if m == 0 and n == 0:
-                        ten[j, m][l, n] += 1
-    """
-    alpha_0 = 1
-    alpha = sum(np.array([alpha_0 ** l / np.sqrt(np.math.factorial(l)) * np.exp(-np.abs(alpha_0) ** 2) for l in range(N)]))
-    ten[0, 0][0, 0] += alpha
-    """
-    # print('inside', ten.reshape(3 * N, - 1, order='F'))
-    return ten / ten.reshape(3 * N,  - 1, order='F').trace()
+    al = 1.25
+    bl = 1.25
+    for j in range(N):
+        for l in range(N):
+            ten[j, 0][l, 0] += 1 / (al ** l * bl ** j * np.exp(-1/2 * (np.abs(al) ** 2 - np.abs(bl) ** 2)) /
+                                    (np.sqrt(np.math.factorial(l) * np.math.factorial(j))))
+    print('initial',ten.reshape(3 * N, -1, order='F'))
+    return ten / ten.reshape(3 * N, - 1).trace()
 
 
 
@@ -260,10 +256,10 @@ def runge2(rho, n):
     rhos.append(rho)
     if KEY2 is False:
         for i in range(n):
-            k1 = helper(rhos[-1])
-            k2 = helper(rhos[-1] + deltas / 2 * k1)
-            k3 = helper(rhos[-1] + deltas / 2 * k2)
-            k4 = helper(rhos[-1] + deltas * k3)
+            k1 = helper2(rhos[-1])
+            k2 = helper2(rhos[-1] + deltas / 2 * k1)
+            k3 = helper2(rhos[-1] + deltas / 2 * k2)
+            k4 = helper2(rhos[-1] + deltas * k3)
             rho1 = rhos[-1] + (k1 + 2 * k2 + 2 * k3 + k4) * deltas / 6
             rhos.append(rho1)
             tester = rho1.reshape(3 * N, - 1, order='F')

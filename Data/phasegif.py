@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import os
-os.chdir('Coherent')
+os.chdir('Coherent2')
 
 N = 100
 R = 50

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import os
 N = 100
 delta = 0.01
-os.chdir('uniruns')
+os.chdir('Coherent2')
 # Path = 'LasingRungeEntropy.npy'
 plt.rc('xtick', labelsize=15)
 plt.rc('ytick', labelsize=15)
@@ -61,13 +61,20 @@ def plot2(path):
     ax[1].set_xlabel(r'Time, $\gamma_h^{-1}$', size=15)
     ax[1].set_ylabel(r'Entropy, $k_b$', size=15)
     ax[1].set_title(f'Zoomed on oscillatory behavior', size=16, pad=2)
-    ax[1].annotate(text='(b)', xy=[0.35, 0.8 * 2.5], size=16)
-    ax[1].set_xlim(0, 6)
+    ax[1].annotate(text='(b)', xy=[0.12, 0.8 * 2.5], size=16)
+    ax[1].set_xlim(0, 2)
     ax[1].set_ylim(0, 2.5)
     # ax.annotate(text=val, xy=[0, 0.9 * np.amax(data)], size=16)
     plt.tight_layout()
-    # plt.show()
-    plt.savefig('CoherentAboveEntropy2.pdf')
+    path = 'CoherentAbove.npy'
+    data2 = parser(path)
+    yarray = (1/2 + np.log(np.sqrt(2 *  np.pi)) * np.log(np.sqrt(data2/data[0])))
+    ax[0].plot(xarray, yarray, '-', markersize=1, label='test')
+    plt.legend()
+    print(data[-1])
+    plt.show()
+    # plt.savefig('CoherentAboveEntropy1.pdf')
+
 
 """
 Paths = ['BelowRungeEntropy.npy', 'LasingRungeEntropy.npy', 'AboveRungeEntropy.npy']
@@ -79,7 +86,7 @@ for Path, val in zip(Paths, cons):
 """
 
 os.chdir('..')
-os.chdir('Coherent2')
-Path = 'AboveRunge2Entropy.npy'
+os.chdir('Coherent')
+Path = 'AboveRunge1Entropy.npy'
 plot2(Path)
 
