@@ -2,12 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import os
-os.chdir('Coherent2')
+# os.chdir('Coherent2')
+os.chdir('..')
+os.chdir('coherenttest')
 
-N = 100
+N = 50
 R = 50
-Path = 'RungeAbove10000_100_0.01_CFalse_iter1.npy'
-FPS = 50
+Path1 = 'RungeAbove2000_50_0.001_CFalse_iter1.npy'
+Path2 = 'MeanAboveCoherent.npy'
+FPS = 30
 
 
 def parser(path):
@@ -37,21 +40,40 @@ def name2(path):
         raise TypeError('Can not save')
 
 
-Dataset = parser(Path)
+Dataset = parser(Path1)
+oc = parser(Path2)
 
 
 def coherent(a, t):
     data = Dataset[t]
+    a_0 = np.sqrt(oc[t])
     val = []
-    for l in range(0, N):
-        for m in range(3):
-            # val += np.exp(-abs(a) ** 2 / 2) * a ** l / (np.sqrt(np.math.factorial(l)))
-            val.append(np.exp(-abs(a) ** 2 / 2) * a ** l / np.sqrt(float(np.math.factorial(l))) * data[l, m][l, m])
-    return sum(val).real/np.pi
+    for m in range(3):
+        for j in range(N):
+            for l in range(N):
+                val1 = np.exp(-np.abs(a) ** 2 / 2) * a ** j / np.sqrt(float(np.math.factorial(j)))
+                val2 = np.exp(-np.abs(a_0) ** 2 / 2) * np.conjugate(a_0) ** l / np.sqrt(float(np.math.factorial(l)))
+                var = val1 * val2 * data[l, m][j, m]
+                val.append(var)
+    return (sum(val).real + sum(val).imag) / np.pi
+
+
+def coherent2(a, t):
+    data = Dataset[t]
+    a_0 = oc[t]
+    a_1 = 5
+    val = []
+    for m in range(3):
+        for j in range(N):
+            val1 = np.exp(-np.abs(a_0) ** 2 / 2) * a_0 ** 2 / np.sqrt(float(np.math.factorial(j)))
+            val2 = np.exp(-np.abs(a_1) ** 2 / 2) * a_1 ** 2 / np.sqrt(float(np.math.factorial(j)))
+            val.append(val1 * val2 * data[j, m][j, m])
+    return (sum(val).real + sum(val).real) / np.pi
 
 
 
-a = 5
+
+a = 7
 xvec = np.linspace(-a, a, R)
 X, Y = np.meshgrid(xvec, xvec)
 
@@ -81,7 +103,7 @@ def animate(t):
     fig.suptitle(f'Time {0.01 * t}')
     return fig,
 
-ani = FuncAnimation(fig, animate, interval=1, frames=int(len(Dataset)))
+ani = FuncAnimation(fig, animate, interval=1, frames=60)
 try:
     ani.save('test.gif', fps=FPS, writer='pillow', extra_args=['-vcodec', 'libx264'])
 except Exception as E:

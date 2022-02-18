@@ -28,12 +28,17 @@ def ocu(data):
     return oc.reshape(3 * N, - 1, order='F').trace().real
 
 
-os.chdir('Coherent2')
+# os.chdir('..')
+os.chdir('Coherent')
+# os.chdir('test')
 rawdata = []
-for i in range(1, 11):
+for i in range(1, 10):
     path = f'RungeAbove10000_100_0.01_CFalse_iter{i}.npy'
-    rawdata.append(parser(path))
-
+    data = parser(path)
+    for i in range(len(data)):
+        rawdata.append(ocu(data[i]))
+        print(len(rawdata))
+"""
 data = np.array([rawdata[i][j] for i in range(len(rawdata))
                  for j in range(len(rawdata[i]))])
 
@@ -43,8 +48,9 @@ for i in range(len(data)):
 
 for i in range(len(occupation)):
     print(occupation[i])
-
-with open('CoherentAbove.npy', 'wb') as file:
-    np.save(file, np.array(occupation))
-
-print(occupation[-1])
+"""
+"""
+with open('BelowOccupation.npy', 'wb') as file:
+    np.save(file, np.array(rawdata))
+"""
+print(rawdata[-1])

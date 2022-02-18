@@ -3,10 +3,10 @@ import sys
 import os
 np.set_printoptions(precision=5, suppress=True, threshold=81)
 
-itera = 1000  # Number of iterations
-N = 3  # Number of particles.
-Iterstep = 500  # Saving parameter
-os.chdir('coherenttest')
+itera = 2000  # Number of iterations
+N = 50  # Number of particles.
+Iterstep = 1000  # Saving parameter
+os.chdir('newv')
 
 
 def parser():
@@ -130,7 +130,7 @@ def rhodot(alpha, beta, rho) -> complex:
         - delta(m, 0) * rho[j, 0][l, n] - delta(n, 0) * rho[j, m][l, 0]
         )
         + gamma_c * (n_c + 1) * (
-        2 * delta(m, 1) * delta(n, 1) * rho[j, 2][l, 2]
+        2 * delta(m, 1) *   delta(n, 1) * rho[j, 2][l, 2]
         - delta(m, 2) * rho[j, 2][l, n] - delta(n, 2) * rho[j, m][l, 2]
         )
         + gamma_c * n_c * (
@@ -157,7 +157,7 @@ def initialrho2(n: int) -> np.array:
     """Returns an initial-conditions density operator, no photon in the ground-state"""
     ten = np.full((n, 3, n, 3), 0, dtype=complex)
     al = 2
-
+    """
     for j in range(n):
         for m in range(3):
             for l in range(n):
@@ -167,13 +167,10 @@ def initialrho2(n: int) -> np.array:
     """
     alpha_0 = 1
     alpha = sum(np.array([alpha_0 ** l / np.sqrt(np.math.factorial(l)) * np.exp(-np.abs(alpha_0) ** 2) for l in range(N)]))
-    ten[0, 0][0, 0] += alpha
-    """
+    #ten[0, 0][0, 0] += alpha
+
     # print('inside', ten.reshape(3 * N, - 1, order='F'))
     return ten / ten.reshape(3 * N,  - 1, order='F').trace()
-
-
-
 
 
 def zerorho(n: int) -> np.array:

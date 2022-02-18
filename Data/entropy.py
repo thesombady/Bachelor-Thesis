@@ -1,8 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-N = 100
-os.chdir('Coherent')
+N = 50
+# os.chdir('Coherent')
+# os.chdir('..')
+# os.chdir('Coherent')
+os.chdir('..')
+os.chdir('newv')
+
 
 
 def parser(path):
@@ -41,16 +46,15 @@ def name(string):
 
 
 rawdata = []
-for i in range(1, 11):
-    path = f'RungeAbove10000_100_0.01_CFalse_iter{i}.npy'
+for i in range(1, 3):
+    path = f'RungeAbove2000_50_0.001_CFalse_iter{i}.npy'
     rawdata.append(parser(path))
 
 data = np.array([rawdata[i][j] for i in range(len(rawdata))
                  for j in range(len(rawdata[i]))])
-
 ent = []
 for i in range(len(data)):
     ent.append(entropy2(data[i]))
 
-with open(name('AboveRunge1'), 'wb') as file:
+with open(name('AboveRunge50'), 'wb') as file:
     np.save(file, np.array(ent))

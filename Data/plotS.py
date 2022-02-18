@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-N = 100
-delta = 0.01
-os.chdir('Coherent2')
+N = 50
+delta = 0.001
+# os.chdir('Coherent2')
 # Path = 'LasingRungeEntropy.npy'
 plt.rc('xtick', labelsize=15)
 plt.rc('ytick', labelsize=15)
@@ -42,8 +42,8 @@ def plot(path, val):
     ax.set_title(f'Entropy of the maser, when \noperating {name(path)}.', size=17, pad=2)
     ax.annotate(text=val, xy=[0, 0.9 * np.amax(data)], size=16)
     plt.tight_layout()
-    #plt.show()
-    plt.savefig(name2(path))
+    plt.show()
+    # plt.savefig(name2(path))
 
 
 def plot2(path):
@@ -66,7 +66,7 @@ def plot2(path):
     ax[1].set_ylim(0, 2.5)
     # ax.annotate(text=val, xy=[0, 0.9 * np.amax(data)], size=16)
     plt.tight_layout()
-    path = 'CoherentAbove.npy'
+    # path = 'CoherentAbove.npy'
     data2 = parser(path)
     yarray = (1/2 + np.log(np.sqrt(2 *  np.pi)) * np.log(np.sqrt(data2/data[0])))
     ax[0].plot(xarray, yarray, '-', markersize=1, label='test')
@@ -85,8 +85,23 @@ for Path, val in zip(Paths, cons):
     plot(Path, val)
 """
 
+def plot3(path):
+    data = parser(path)
+    xarray = np.array([i * delta for i in range(len(data))])
+    fig, ax = plt.subplots(1, 1, figsize=(7, 5))
+    plt.plot(xarray, data, '-', markersize=1)
+    ax.set_ylabel(r'Entropy, $k_b$', size=15)
+    ax.set_xlabel(r'Time, $\gamma_h^{-1}$', size=15, labelpad=-3)
+    ax.set_title(f'Entropy of the maser, when \noperating {name(path)}.', size=17, pad=2)
+    plt.grid()
+    plt.show()
+    # plt.savefig('EntropyAbove5.pdf')
+
+
 os.chdir('..')
-os.chdir('Coherent')
-Path = 'AboveRunge1Entropy.npy'
-plot2(Path)
+# os.chdir('Coherent')
+# os.chdir('coherenttest')
+os.chdir('newv')
+Path = 'AboveRunge50Entropy.npy'
+plot3(Path)
 

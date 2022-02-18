@@ -3,10 +3,10 @@ import sys
 import os
 np.set_printoptions(precision=5, suppress=True, threshold=81)
 
-itera = 1000  # Number of iterations
-N = 10  # Number of particles.
-Iterstep = 500  # Saving parameter
-os.chdir('coherenttest')
+itera = 2000  # Number of iterations
+N = 50  # Number of particles.
+Iterstep = 1000  # Saving parameter
+os.chdir('newv')
 
 
 def parser():
@@ -164,12 +164,19 @@ def initialrho2(n: int) -> np.array:
     for j in range(N):
         for l in range(N):
             ten[j, 0][l, 0] += 1 / (al ** l * bl ** j * np.exp(-1/2 * (np.abs(al) ** 2 - np.abs(bl) ** 2)) /
-                                    (np.sqrt(np.math.factorial(l) * np.math.factorial(j))))
-    print('initial',ten.reshape(3 * N, -1, order='F'))
+                                    (np.sqrt(np.math.factorial(float(l)) * np.math.factorial(float(j)))))
+    print('initial', ten.reshape(3 * N, -1, order='F'))
     return ten / ten.reshape(3 * N, - 1).trace()
 
 
-
+def initialrho3(n: int) -> np.array:
+    ten = np.full((n, 3, n, 3), 0, dtype=complex)
+    al = 5
+    for j in range(N):
+        for l in range(N):
+            ten[j, 0][l, 0] += (np.exp(-np.abs(al) ** 2) * (al ** l) * (al ** j)
+                                /(np.sqrt(float(np.math.factorial(j))) * np.sqrt(float(np.math.factorial(l)))))
+    return ten/ten.reshape(3 * N, -1, order='F').trace()
 
 
 def zerorho(n: int) -> np.array:
@@ -297,7 +304,7 @@ def runge2(rho, n):
             np.save(file, np.array(rhos))
 
 
-Rho0 = initialrho2(n=N)
+Rho0 = initialrho3(n=N)
 """Initiates the program"""
 try:
     Method[KEY](Rho0, itera)
