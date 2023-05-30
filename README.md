@@ -1,10 +1,3 @@
-# My Github
-![Your Repository’s Stats](https://github-readme-stats.vercel.app/api?username=thesombady&show_icons=true)
-
-![Your Repository's Stats](https://github-readme-stats.vercel.app/api/top-langs/?username=thesombady&theme=blue-green)
-
-
-Above you can see a summary of my activity on Github.
 ## My journey
 I have been working on loads of small projects corresponding to course-work and self-interest in python, which can be viewed in my public repositories.
 A few of my larger projects include: Newton Fractals, Sacra, and Bachelor-Thesis, were one is a course-work, Newton Fractals, one is of own self-interest, Sacra, and lastly the Bachelor-Thesis project is that which means to examinate my learnings in the bachelor program of physiscs at Lund University.
