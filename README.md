@@ -18,6 +18,10 @@ The program is used to solve, by the Runge-Kutta method, the following equation,
 
 <img src="https://render.githubusercontent.com/render/math?math=\dot{\rho}=\frac{1}{i\hbar}\Big[\hat{H},\hat{\rho}\Big]\pm\sum_{i\in\{c,h\}}\mathcal{L}_i[\hat{\rho}]">
 
+$$
+\dot{\rho} = \frac{1}{\hbar}\Big[\hat{H}, \hat{\rho}\Big] + \sum_{i\in\{c, h\}}}\mathcal{L_i}[\hat{\rho}]
+$$
+
 Note, there is no minus, could just not render without it. Furthermore, the density matrix is of pure-states, such that the standards relationships holds. Therefore, it's easy to extract
 the entropy of the system, which can be related to the state of the system evolution.
 ## Outline 
